@@ -43,7 +43,7 @@ function Home(): React.JSX.Element {
   return (
     <div className="home-container">
       <div className="bills-section">
-        <h2>Your Bills</h2>
+        <h2>The Bills</h2>
 
         <div className="create-bill-form">
           <input
