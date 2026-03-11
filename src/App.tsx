@@ -1,11 +1,11 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { AppProvider } from './context/AppContext'
-import Navigation from './components/Navigation'
-import Home from './pages/Home'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import './App.css'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AppProvider } from "./context/AppContext";
+import Navigation from "./components/Navigation";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import "./App.css";
 
 function App(): React.JSX.Element {
   return (
@@ -23,7 +23,7 @@ function App(): React.JSX.Element {
         </div>
       </Router>
     </AppProvider>
-  )
+  );
 }
 
-export default App
+export default App;

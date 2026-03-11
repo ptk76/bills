@@ -1,41 +1,50 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
-import './About.css';
+import React, { useState } from "react";
+import { useAppContext } from "../context/AppContext";
+import "./About.css";
 
 function About(): React.JSX.Element {
-  const { names, items, addItem, updateItem, deleteItem, toggleNameInItem, title, setTitle } = useAppContext();
-  const [itemName, setItemName] = useState<string>('');
-  const [itemPrice, setItemPrice] = useState<string>('');
+  const {
+    names,
+    items,
+    addItem,
+    updateItem,
+    deleteItem,
+    toggleNameInItem,
+    title,
+    setTitle,
+  } = useAppContext();
+  const [itemName, setItemName] = useState<string>("");
+  const [itemPrice, setItemPrice] = useState<string>("");
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editName, setEditName] = useState<string>('');
-  const [editPrice, setEditPrice] = useState<string>('');
+  const [editName, setEditName] = useState<string>("");
+  const [editPrice, setEditPrice] = useState<string>("");
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
-  const [tempTitle, setTempTitle] = useState<string>('');
+  const [tempTitle, setTempTitle] = useState<string>("");
   const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
   const handleAddItem = () => {
-    if (itemName.trim() !== '' && itemPrice.trim() !== '') {
+    if (itemName.trim() !== "" && itemPrice.trim() !== "") {
       const price = parseFloat(itemPrice);
       if (!isNaN(price) && price > 0) {
         addItem({
           name: itemName.trim(),
           price: price,
-          checkedNames: []
+          checkedNames: [],
         });
-        setItemName('');
-        setItemPrice('');
+        setItemName("");
+        setItemPrice("");
       }
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleAddItem();
     }
   };
 
   const startEditing = (itemId: string) => {
-    const item = items.find(i => i.id === itemId);
+    const item = items.find((i) => i.id === itemId);
     if (item) {
       setEditingItemId(itemId);
       setEditName(item.name);
@@ -45,17 +54,17 @@ function About(): React.JSX.Element {
 
   const cancelEditing = () => {
     setEditingItemId(null);
-    setEditName('');
-    setEditPrice('');
+    setEditName("");
+    setEditPrice("");
   };
 
   const saveEdit = () => {
-    if (editingItemId && editName.trim() !== '' && editPrice.trim() !== '') {
+    if (editingItemId && editName.trim() !== "" && editPrice.trim() !== "") {
       const price = parseFloat(editPrice);
       if (!isNaN(price) && price > 0) {
         updateItem(editingItemId, {
           name: editName.trim(),
-          price: price
+          price: price,
         });
         cancelEditing();
       }
@@ -63,22 +72,22 @@ function About(): React.JSX.Element {
   };
 
   const handleEditKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       saveEdit();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       cancelEditing();
     }
   };
 
   const calculateItemTotal = (itemId: string): number => {
-    const item = items.find(i => i.id === itemId);
+    const item = items.find((i) => i.id === itemId);
     if (!item || item.checkedNames.length === 0) return 0;
     return item.price / item.checkedNames.length;
   };
 
   const calculatePersonTotal = (personName: string): number => {
     let total = 0;
-    items.forEach(item => {
+    items.forEach((item) => {
       if (item.checkedNames.includes(personName)) {
         total += item.price / item.checkedNames.length;
       }
@@ -96,31 +105,27 @@ function About(): React.JSX.Element {
   };
 
   const saveTitleEdit = () => {
-    if (tempTitle.trim() !== '') {
+    if (tempTitle.trim() !== "") {
       setTitle(tempTitle.trim());
       setEditingTitle(false);
     }
   };
 
   const cancelTitleEdit = () => {
-    setTempTitle('');
+    setTempTitle("");
     setEditingTitle(false);
   };
 
   const handleTitleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       saveTitleEdit();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       cancelTitleEdit();
     }
   };
 
   return (
     <div className="about-container">
-      <h1>About Page</h1>
-      <p>This is the about page where you can learn more about our application.</p>
-      <p>Built with React, Vite, and React Router.</p>
-
       <div className="items-section">
         <div className="title-header">
           {editingTitle ? (
@@ -156,7 +161,9 @@ function About(): React.JSX.Element {
           <div className="total-price-section">
             <div className="total-price-content">
               <span className="total-price-label">Total Price:</span>
-              <span className="total-price-amount">${calculateTotalPrice().toFixed(2)}</span>
+              <span className="total-price-amount">
+                ${calculateTotalPrice().toFixed(2)}
+              </span>
             </div>
           </div>
         )}
@@ -170,8 +177,10 @@ function About(): React.JSX.Element {
                 return (
                   <div
                     key={index}
-                    className={`person-summary-item ${selectedPerson === name ? 'selected' : ''}`}
-                    onClick={() => setSelectedPerson(selectedPerson === name ? null : name)}
+                    className={`person-summary-item ${selectedPerson === name ? "selected" : ""}`}
+                    onClick={() =>
+                      setSelectedPerson(selectedPerson === name ? null : name)
+                    }
                   >
                     <div className="person-info">
                       <input
@@ -216,11 +225,12 @@ function About(): React.JSX.Element {
 
         {names.length === 0 && (
           <p className="warning-message">
-            No contacts available. Please add contacts on the Contact page first.
+            No contacts available. Please add contacts on the Contact page
+            first.
           </p>
         )}
 
-{items.length > 0 ? (
+        {items.length > 0 ? (
           <div className="items-list">
             {items.map((item) => (
               <div key={item.id} className="item-card">
@@ -305,7 +315,8 @@ function About(): React.JSX.Element {
                     {item.checkedNames.length > 0 && (
                       <div className="item-summary">
                         <p className="split-info">
-                          Split between {item.checkedNames.length} {item.checkedNames.length === 1 ? 'person' : 'people'}
+                          Split between {item.checkedNames.length}{" "}
+                          {item.checkedNames.length === 1 ? "person" : "people"}
                         </p>
                         <p className="per-person">
                           ${calculateItemTotal(item.id).toFixed(2)} per person
@@ -318,7 +329,9 @@ function About(): React.JSX.Element {
             ))}
           </div>
         ) : (
-          <p className="empty-message">No items added yet. Add your first item above!</p>
+          <p className="empty-message">
+            No items added yet. Add your first item above!
+          </p>
         )}
       </div>
     </div>

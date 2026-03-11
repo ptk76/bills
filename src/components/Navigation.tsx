@@ -1,19 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './Navigation.css';
+import React from "react";
+import { Link } from "react-router-dom";
+import "./Navigation.css";
 
 function Navigation(): React.JSX.Element {
   return (
     <nav className="navigation">
       <ul>
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/">Bills</Link>
         </li>
         <li>
-          <Link to="/about">About</Link>
-        </li>
-        <li>
-          <Link to="/contact">Contact</Link>
+          <Link to="/contact">Friends</Link>
         </li>
       </ul>
     </nav>
