@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { Item, useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
 function Home(): React.JSX.Element {
-  const { bills, currentBillId, createBill, deleteBill, selectBill } =
+  const { friends, bills, currentBillId, createBill, deleteBill, selectBill } =
     useAppContext();
   const [billTitle, setBillTitle] = useState<string>("");
   const navigate = useNavigate();
@@ -40,6 +40,11 @@ function Home(): React.JSX.Element {
     return bill.items.reduce((total, item) => total + item.price, 0);
   };
 
+  const countPeople = (items: Item[]) => {
+    const people = new Set<String>();
+    items.forEach((item) => item.checkedNames.forEach((id) => people.add(id)));
+    return people.size;
+  };
   return (
     <div className="home-container">
       <div className="bills-section">
@@ -82,10 +87,19 @@ function Home(): React.JSX.Element {
                         <strong>{bill.items.length}</strong> items
                       </span>
                       <span className="stat-item">
-                        <strong>{bill.names.length}</strong> people
+                        <strong>{countPeople(bill.items)}</strong> people
+                      </span>
+                      <span className="stat-item">
+                        Paid by:{" "}
+                        <strong>
+                          {
+                            friends.find((friend) => friend.id === bill.paidBy)
+                              ?.name
+                          }
+                        </strong>
                       </span>
                     </div>
-                    <div className="bill-total">${total.toFixed(2)}</div>
+                    <div className="bill-total">{total.toFixed(2)} €</div>
                   </div>
                   <div className="bill-actions">
                     <button

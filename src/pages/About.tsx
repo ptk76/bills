@@ -4,7 +4,7 @@ import "./About.css";
 
 function About(): React.JSX.Element {
   const {
-    names,
+    friends,
     items,
     addItem,
     updateItem,
@@ -12,27 +12,33 @@ function About(): React.JSX.Element {
     toggleNameInItem,
     title,
     setTitle,
+    paidBy,
+    updatePaidBy,
   } = useAppContext();
   const [itemName, setItemName] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
+  const [itemQuantity, setItemQuantity] = useState<string>("1");
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editName, setEditName] = useState<string>("");
   const [editPrice, setEditPrice] = useState<string>("");
+  const [editQuantity, setEditQuantity] = useState<string>("1");
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
   const [tempTitle, setTempTitle] = useState<string>("");
-  const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
   const handleAddItem = () => {
     if (itemName.trim() !== "" && itemPrice.trim() !== "") {
       const price = parseFloat(itemPrice);
+      const quantity = parseInt(itemQuantity);
       if (!isNaN(price) && price > 0) {
         addItem({
           name: itemName.trim(),
           price: price,
+          quantity: quantity,
           checkedNames: [],
         });
         setItemName("");
         setItemPrice("");
+        setItemQuantity("1");
       }
     }
   };
@@ -162,36 +168,36 @@ function About(): React.JSX.Element {
             <div className="total-price-content">
               <span className="total-price-label">Total Price:</span>
               <span className="total-price-amount">
-                ${calculateTotalPrice().toFixed(2)}
+                {calculateTotalPrice().toFixed(2)} €
               </span>
             </div>
           </div>
         )}
 
-        {names.length > 0 && (
+        {friends.length > 0 && (
           <div className="names-summary-section">
             <h3>People & Totals</h3>
             <div className="names-summary-list">
-              {names.map((name, index) => {
-                const total = calculatePersonTotal(name);
+              {friends.map((friend) => {
+                const total = calculatePersonTotal(friend.id);
                 return (
                   <div
-                    key={index}
-                    className={`person-summary-item ${selectedPerson === name ? "selected" : ""}`}
-                    onClick={() =>
-                      setSelectedPerson(selectedPerson === name ? null : name)
-                    }
+                    key={friend.id}
+                    className={`person-summary-item ${paidBy === friend.id ? "selected" : ""}`}
+                    onClick={() => {
+                      updatePaidBy(friend.id ? friend.id : null);
+                    }}
                   >
                     <div className="person-info">
                       <input
                         type="radio"
-                        checked={selectedPerson === name}
-                        onChange={() => setSelectedPerson(name)}
+                        checked={paidBy === friend.id}
+                        onChange={() => updatePaidBy(friend.id)}
                         className="person-radio"
                       />
-                      <span className="person-name">{name}</span>
+                      <span className="person-name">{friend.name}</span>
                     </div>
-                    <span className="person-total">${total.toFixed(2)}</span>
+                    <span className="person-total">{total.toFixed(2)} €</span>
                   </div>
                 );
               })}
@@ -218,12 +224,23 @@ function About(): React.JSX.Element {
             step="0.01"
             className="item-price-input"
           />
+          <input
+            type="number"
+            value={itemQuantity}
+            onChange={(e) => setItemQuantity(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Quantity"
+            min="1"
+            max="100"
+            step="1"
+            className="item-price-input"
+          />
           <button onClick={handleAddItem} className="add-item-button">
             Add Item
           </button>
         </div>
 
-        {names.length === 0 && (
+        {friends.length === 0 && (
           <p className="warning-message">
             No contacts available. Please add contacts on the Contact page
             first.
@@ -260,6 +277,17 @@ function About(): React.JSX.Element {
                         step="0.01"
                         className="edit-price-input"
                       />
+                      <input
+                        type="number"
+                        value={editQuantity}
+                        onChange={(e) => setEditQuantity(e.target.value)}
+                        onKeyPress={handleEditKeyPress}
+                        placeholder="Quantity"
+                        min="1"
+                        max="100"
+                        step="1"
+                        className="edit-price-input"
+                      />
                     </div>
                     <div className="edit-actions">
                       <button onClick={saveEdit} className="save-button">
@@ -276,7 +304,7 @@ function About(): React.JSX.Element {
                     <div className="item-header">
                       <div className="item-info">
                         <h3>{item.name}</h3>
-                        <p className="item-price">${item.price.toFixed(2)}</p>
+                        <p className="item-price">{item.price.toFixed(2)} €</p>
                       </div>
                       <div className="item-actions">
                         <button
@@ -294,18 +322,22 @@ function About(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {names.length > 0 && (
+                    {friends.length > 0 && (
                       <div className="names-checkboxes">
                         <h4>Split with:</h4>
                         <div className="checkbox-list">
-                          {names.map((name, index) => (
-                            <label key={index} className="checkbox-label">
+                          {friends.map((friend) => (
+                            <label key={friend.id} className="checkbox-label">
                               <input
                                 type="checkbox"
-                                checked={item.checkedNames.includes(name)}
-                                onChange={() => toggleNameInItem(item.id, name)}
+                                checked={item.checkedNames.includes(friend.id)}
+                                onChange={() =>
+                                  toggleNameInItem(item.id, friend.id)
+                                }
                               />
-                              <span className="checkbox-name">{name}</span>
+                              <span className="checkbox-name">
+                                {friend.name}
+                              </span>
                             </label>
                           ))}
                         </div>
@@ -319,7 +351,7 @@ function About(): React.JSX.Element {
                           {item.checkedNames.length === 1 ? "person" : "people"}
                         </p>
                         <p className="per-person">
-                          ${calculateItemTotal(item.id).toFixed(2)} per person
+                          {calculateItemTotal(item.id).toFixed(2)} € per person
                         </p>
                       </div>
                     )}

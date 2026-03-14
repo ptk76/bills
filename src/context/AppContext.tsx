@@ -6,17 +6,23 @@ import React, {
   useEffect,
 } from "react";
 
+export interface Friend {
+  id: string;
+  name: string;
+}
+
 export interface Item {
   id: string;
   name: string;
   price: number;
+  quantity: number;
   checkedNames: string[];
 }
 
 export interface Bill {
   id: string;
   title: string;
-  names: string[];
+  paidBy: string | null;
   items: Item[];
   createdAt: number;
 }
@@ -29,21 +35,24 @@ interface AppContextType {
   deleteBill: (billId: string) => void;
   selectBill: (billId: string) => void;
   updateBillTitle: (title: string) => void;
-  names: string[];
-  addName: (name: string) => void;
-  deleteName: (index: number) => void;
+  friends: Friend[];
+  addFriend: (name: string) => void;
+  deleteFriend: (id: string) => void;
   items: Item[];
   addItem: (item: Omit<Item, "id">) => void;
   updateItem: (id: string, updates: Partial<Omit<Item, "id">>) => void;
   deleteItem: (id: string) => void;
   toggleNameInItem: (itemId: string, name: string) => void;
   title: string;
+  paidBy: string | null;
   setTitle: (title: string) => void;
+  updatePaidBy: (friendId: string | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
+  FRIENDS: "bill-manager-friends",
   BILLS: "bill-manager-bills",
   CURRENT_BILL_ID: "bill-manager-current-bill-id",
 };
@@ -58,7 +67,7 @@ const loadFromLocalStorage = <T,>(key: string, defaultValue: T): T => {
   }
 };
 
-const saveToLocalStorage = <T,>(key: string, value: T): void => {
+const saveToLocalStorage = (key: string, value: any): void => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
@@ -69,12 +78,20 @@ const saveToLocalStorage = <T,>(key: string, value: T): void => {
 export const AppProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const [friends, setFriends] = useState<Friend[]>(() =>
+    loadFromLocalStorage(STORAGE_KEYS.FRIENDS, []),
+  );
   const [bills, setBills] = useState<Bill[]>(() =>
     loadFromLocalStorage(STORAGE_KEYS.BILLS, []),
   );
   const [currentBillId, setCurrentBillId] = useState<string | null>(() =>
     loadFromLocalStorage(STORAGE_KEYS.CURRENT_BILL_ID, null),
   );
+
+  // Save friends to localStorage whenever they change
+  useEffect(() => {
+    saveToLocalStorage(STORAGE_KEYS.FRIENDS, friends);
+  }, [friends]);
 
   // Save bills to localStorage whenever they change
   useEffect(() => {
@@ -87,15 +104,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   }, [currentBillId]);
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
-  const names = currentBill?.names || [];
+  // const names = friends || [];
   const items = currentBill?.items || [];
   const title = currentBill?.title || "Items & Billing";
+  const paidBy = currentBill?.paidBy || null;
 
   const createBill = (billTitle: string) => {
     const newBill: Bill = {
       id: Date.now().toString(),
       title: billTitle.trim() || "New Bill",
-      names: [],
+      paidBy: "",
       items: [],
       createdAt: Date.now(),
     };
@@ -127,51 +145,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     updateBillTitle(newTitle);
   };
 
-  const addName = (name: string) => {
+  const addFriend = (name: string) => {
     if (name.trim() === "") return;
 
-    // If no bill exists or no bill is selected, create a default bill
-    if (!currentBillId || bills.length === 0) {
-      const newBill: Bill = {
-        id: Date.now().toString(),
-        title: "My Bill",
-        names: [name.trim()],
-        items: [],
-        createdAt: Date.now(),
-      };
-      setBills([...bills, newBill]);
-      setCurrentBillId(newBill.id);
-      return;
-    }
+    const newFriend: Friend = {
+      id: Date.now().toString(),
+      name: name,
+    };
 
-    setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId
-          ? { ...bill, names: [...bill.names, name.trim()] }
-          : bill,
-      ),
-    );
+    setFriends([...friends, newFriend]);
   };
 
-  const deleteName = (index: number) => {
-    if (!currentBillId) return;
-    const nameToDelete = currentBill!.names[index];
+  const deleteFriend = (friendId: string) => {
     setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId
-          ? {
-              ...bill,
-              names: bill.names.filter((_, i) => i !== index),
-              items: bill.items.map((item) => ({
-                ...item,
-                checkedNames: item.checkedNames.filter(
-                  (n) => n !== nameToDelete,
-                ),
-              })),
-            }
-          : bill,
-      ),
+      bills.map((bill) => ({
+        ...bill,
+        items: bill.items.map((item) => ({
+          ...item,
+          checkedNames: item.checkedNames.filter((id) => id !== friendId),
+        })),
+      })),
     );
+    setFriends(friends.filter((f) => f.id !== friendId));
   };
 
   const addItem = (item: Omit<Item, "id">) => {
@@ -185,7 +180,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
       const newBill: Bill = {
         id: Date.now().toString(),
         title: "My Bill",
-        names: [],
+        paidBy: "",
         items: [newItem],
         createdAt: Date.now(),
       };
@@ -255,6 +250,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     );
   };
 
+  const updatePaidBy = (friendId: string | null) => {
+    setBills(
+      bills.map((bill) =>
+        bill.id === currentBillId ? { ...bill, paidBy: friendId } : bill,
+      ),
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -265,16 +268,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
         deleteBill,
         selectBill,
         updateBillTitle,
-        names,
-        addName,
-        deleteName,
+        friends,
+        addFriend,
+        deleteFriend,
         items,
         addItem,
         updateItem,
         deleteItem,
         toggleNameInItem,
         title,
+        paidBy,
         setTitle,
+        updatePaidBy,
       }}
     >
       {children}

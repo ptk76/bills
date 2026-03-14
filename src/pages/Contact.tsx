@@ -3,16 +3,16 @@ import { useAppContext } from "../context/AppContext";
 import "./Contact.css";
 
 function Contact(): React.JSX.Element {
-  const { names, addName, deleteName } = useAppContext();
+  const { friends, addFriend, deleteFriend } = useAppContext();
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleAddName = () => {
-    addName(inputValue);
+    addFriend(inputValue);
     setInputValue("");
   };
 
-  const handleDeleteName = (index: number) => {
-    deleteName(index);
+  const handleDeleteName = (id: string) => {
+    deleteFriend(id);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -40,13 +40,13 @@ function Contact(): React.JSX.Element {
           </button>
         </div>
 
-        {names.length > 0 ? (
+        {friends.length > 0 ? (
           <ul className="names-list">
-            {names.map((name, index) => (
-              <li key={index} className="name-item">
-                <span className="name-text">{name}</span>
+            {friends.map((friend) => (
+              <li key={friend.id} className="name-item">
+                <span className="name-text">{friend.name}</span>
                 <button
-                  onClick={() => handleDeleteName(index)}
+                  onClick={() => handleDeleteName(friend.id)}
                   className="delete-button"
                 >
                   Delete
