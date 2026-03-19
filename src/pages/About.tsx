@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { Item, Split, useAppContext } from "../context/AppContext";
 import "./About.css";
 
 function About(): React.JSX.Element {
@@ -55,6 +55,7 @@ function About(): React.JSX.Element {
       setEditingItemId(itemId);
       setEditName(item.name);
       setEditPrice(item.price.toString());
+      setEditQuantity(item.quantity.toString());
     }
   };
 
@@ -62,15 +63,18 @@ function About(): React.JSX.Element {
     setEditingItemId(null);
     setEditName("");
     setEditPrice("");
+    setEditQuantity("");
   };
 
   const saveEdit = () => {
     if (editingItemId && editName.trim() !== "" && editPrice.trim() !== "") {
       const price = parseFloat(editPrice);
+      const quantity = parseInt(editQuantity);
       if (!isNaN(price) && price > 0) {
         updateItem(editingItemId, {
           name: editName.trim(),
           price: price,
+          quantity: quantity,
         });
         cancelEditing();
       }
@@ -88,21 +92,29 @@ function About(): React.JSX.Element {
   const calculateItemTotal = (itemId: string): number => {
     const item = items.find((i) => i.id === itemId);
     if (!item || item.checkedNames.length === 0) return 0;
-    return item.price / item.checkedNames.length;
+    return (item.price * item.quantity) / item.checkedNames.length;
   };
 
-  const calculatePersonTotal = (personName: string): number => {
-    let total = 0;
-    items.forEach((item) => {
-      if (item.checkedNames.includes(personName)) {
-        total += item.price / item.checkedNames.length;
-      }
-    });
-    return total;
+  const calculatePersonTotal = (friendId: string): number => {
+    const personSplits = items.reduce((prev, item) => {
+      const allSplit = item.checkedNames.reduce(
+        (prev, split) => prev + split.quantity,
+        0,
+      );
+      const friendSplit = item.checkedNames.reduce(
+        (prev, split) =>
+          split.friendId === friendId ? prev + split.quantity : prev,
+        0,
+      );
+      if (allSplit === 0) return prev;
+      return prev + (item.price * item.quantity * friendSplit) / allSplit;
+    }, 0);
+
+    return personSplits;
   };
 
   const calculateTotalPrice = (): number => {
-    return items.reduce((total, item) => total + item.price, 0);
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   const startEditingTitle = () => {
@@ -128,6 +140,21 @@ function About(): React.JSX.Element {
     } else if (e.key === "Escape") {
       cancelTitleEdit();
     }
+  };
+
+  const calculateItemSplitByFriend = (item: Item, friendId: string) => {
+    const totalParts = item.checkedNames.reduce(
+      (sum, split) => sum + split.quantity,
+      0,
+    );
+    const friendSplit = item.checkedNames.find(
+      (split) => split.friendId === friendId,
+    );
+    const friendParts = friendSplit?.quantity ?? 0;
+
+    return friendParts !== 0
+      ? ((item.price * item.quantity) / totalParts) * friendParts
+      : 0;
   };
 
   return (
@@ -304,7 +331,6 @@ function About(): React.JSX.Element {
                     <div className="item-header">
                       <div className="item-info">
                         <h3>{item.name}</h3>
-                        <p className="item-price">{item.price.toFixed(2)} €</p>
                       </div>
                       <div className="item-actions">
                         <button
@@ -321,38 +347,65 @@ function About(): React.JSX.Element {
                         </button>
                       </div>
                     </div>
+                    <div className="item-price-container">
+                      <p className="item-price">{item.price.toFixed(2)} € </p>
+                      <p className="item-quantity">x {item.quantity}</p>
+                      <p className="item-price-total">
+                        {(item.price * item.quantity).toFixed(2)} €
+                      </p>
+                    </div>
 
                     {friends.length > 0 && (
                       <div className="names-checkboxes">
                         <h4>Split with:</h4>
                         <div className="checkbox-list">
                           {friends.map((friend) => (
-                            <label key={friend.id} className="checkbox-label">
-                              <input
-                                type="checkbox"
-                                checked={item.checkedNames.includes(friend.id)}
-                                onChange={() =>
-                                  toggleNameInItem(item.id, friend.id)
-                                }
-                              />
-                              <span className="checkbox-name">
-                                {friend.name}
-                              </span>
+                            <label
+                              key={friend.id}
+                              className="checkbox-label"
+                              onClick={() =>
+                                toggleNameInItem(item.id, friend.id)
+                              }
+                            >
+                              <div className="checkbox-name">
+                                <div>{friend.name}</div>
+                                <span
+                                  className={
+                                    calculateItemSplitByFriend(
+                                      item,
+                                      friend.id,
+                                    ) === 0
+                                      ? "checkbox-quantity checkbox-hide"
+                                      : "checkbox-quantity"
+                                  }
+                                >
+                                  {
+                                    item.checkedNames.find(
+                                      (split) => split.friendId === friend.id,
+                                    )?.quantity
+                                  }
+                                </span>
+                                <span
+                                  className={
+                                    calculateItemSplitByFriend(
+                                      item,
+                                      friend.id,
+                                    ) === 0
+                                      ? "checkbox-split checkbox-hide"
+                                      : "checkbox-split"
+                                  }
+                                >
+                                  [
+                                  {calculateItemSplitByFriend(
+                                    item,
+                                    friend.id,
+                                  ).toFixed(2)}{" "}
+                                  €]
+                                </span>
+                              </div>
                             </label>
                           ))}
                         </div>
-                      </div>
-                    )}
-
-                    {item.checkedNames.length > 0 && (
-                      <div className="item-summary">
-                        <p className="split-info">
-                          Split between {item.checkedNames.length}{" "}
-                          {item.checkedNames.length === 1 ? "person" : "people"}
-                        </p>
-                        <p className="per-person">
-                          {calculateItemTotal(item.id).toFixed(2)} € per person
-                        </p>
                       </div>
                     )}
                   </>

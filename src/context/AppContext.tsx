@@ -11,12 +11,17 @@ export interface Friend {
   name: string;
 }
 
+export interface Split {
+  friendId: string;
+  quantity: number;
+}
+
 export interface Item {
   id: string;
   name: string;
   price: number;
   quantity: number;
-  checkedNames: string[];
+  checkedNames: Split[];
 }
 
 export interface Bill {
@@ -162,7 +167,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
         ...bill,
         items: bill.items.map((item) => ({
           ...item,
-          checkedNames: item.checkedNames.filter((id) => id !== friendId),
+          checkedNames: item.checkedNames.filter(
+            (split) => split.friendId !== friendId,
+          ),
         })),
       })),
     );
@@ -225,7 +232,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     );
   };
 
-  const toggleNameInItem = (itemId: string, name: string) => {
+  const toggleNameInItem = (itemId: string, friendId: string) => {
     if (!currentBillId) return;
     setBills(
       bills.map((bill) =>
@@ -234,21 +241,64 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
               ...bill,
               items: bill.items.map((item) => {
                 if (item.id === itemId) {
-                  const isChecked = item.checkedNames.includes(name);
-                  return {
-                    ...item,
-                    checkedNames: isChecked
-                      ? item.checkedNames.filter((n) => n !== name)
-                      : [...item.checkedNames, name],
-                  };
+                  if (
+                    !item.checkedNames.find(
+                      (split) => split.friendId === friendId,
+                    )
+                  ) {
+                    item.checkedNames.push({ friendId: friendId, quantity: 0 });
+                  }
                 }
-                return item;
+
+                return item.id === itemId
+                  ? {
+                      ...item,
+                      checkedNames: item.checkedNames.map((split) =>
+                        split.friendId === friendId
+                          ? {
+                              ...split,
+                              quantity:
+                                (split.quantity + 1) % (item.quantity + 1),
+                            }
+                          : split,
+                      ),
+                    }
+                  : item;
               }),
             }
           : bill,
       ),
     );
   };
+
+  // const toggleNameInItem = (itemId: string, friendId: string) => {
+  //   if (!currentBillId) return;
+  //   console.log("TOGGLE", itemId, friendId);
+  //   setBills(
+  //     bills.map((bill) =>
+  //       bill.id === currentBillId
+  //         ? {
+  //             ...bill,
+  //             items: bill.items.map((item) =>
+  //               item.id === itemId
+  //                 ? {
+  //                     ...item,
+  //                     checkedNames: item.checkedNames.map((split) =>
+  //                       split.friendId === friendId
+  //                         ? {
+  //                             ...split,
+  //                             quantity: (split.quantity + 1) % item.quantity,
+  //                           }
+  //                         : split,
+  //                     ),
+  //                   }
+  //                 : item,
+  //             ),
+  //           }
+  //         : bill,
+  //     ),
+  //   );
+  // };
 
   const updatePaidBy = (friendId: string | null) => {
     setBills(

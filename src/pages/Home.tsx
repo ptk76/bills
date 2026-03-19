@@ -37,12 +37,17 @@ function Home(): React.JSX.Element {
   const calculateBillTotal = (billId: string): number => {
     const bill = bills.find((b) => b.id === billId);
     if (!bill) return 0;
-    return bill.items.reduce((total, item) => total + item.price, 0);
+    return bill.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0,
+    );
   };
 
   const countPeople = (items: Item[]) => {
     const people = new Set<String>();
-    items.forEach((item) => item.checkedNames.forEach((id) => people.add(id)));
+    items.forEach((item) =>
+      item.checkedNames.forEach((split) => people.add(split.friendId)),
+    );
     return people.size;
   };
   return (
@@ -92,10 +97,10 @@ function Home(): React.JSX.Element {
                       <span className="stat-item">
                         Paid by:{" "}
                         <strong>
-                          {
-                            friends.find((friend) => friend.id === bill.paidBy)
-                              ?.name
-                          }
+                          {friends.find((friend) => friend.id === bill.paidBy)
+                            ?.name ?? (
+                            <strong className="paid-by-none">NONE</strong>
+                          )}
                         </strong>
                       </span>
                     </div>

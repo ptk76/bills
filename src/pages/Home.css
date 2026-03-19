@@ -144,6 +144,11 @@
   font-weight: 600;
 }
 
+.paid-by-none {
+  color: red !important;
+  font-weight: 900 !important;
+}
+
 .bill-total {
   font-size: 1.75rem;
   font-weight: bold;
