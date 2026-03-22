@@ -51,9 +51,10 @@ function Statistics(): React.JSX.Element {
     return debts;
   };
 
-  // Calculate total debts across all bills
+  // Calculate total debts across all bills with netting
   const calculateTotalDebts = (): Debt[] => {
-    const debtMap = new Map<string, number>();
+    // First, collect all debts in a map: person1 -> person2 -> amount
+    const debtMatrix = new Map<string, Map<string, number>>();
 
     bills.forEach((bill) => {
       if (!bill.paidBy) return;
@@ -79,19 +80,45 @@ function Statistics(): React.JSX.Element {
         }, 0);
 
         if (personTotal > 0) {
-          const key = `${friend.name}→${payer.name}`;
-          debtMap.set(key, (debtMap.get(key) || 0) + personTotal);
+          // friend owes payer
+          if (!debtMatrix.has(friend.name)) {
+            debtMatrix.set(friend.name, new Map());
+          }
+          const friendDebts = debtMatrix.get(friend.name)!;
+          friendDebts.set(payer.name, (friendDebts.get(payer.name) || 0) + personTotal);
         }
       });
     });
 
-    const debts: Debt[] = [];
-    debtMap.forEach((amount, key) => {
-      const [from, to] = key.split("→");
-      debts.push({ from, to, amount });
+    // Now calculate net debts
+    const netDebts: Debt[] = [];
+    const processedPairs = new Set<string>();
+
+    debtMatrix.forEach((owedTo, person1) => {
+      owedTo.forEach((amount1, person2) => {
+        const pairKey = [person1, person2].sort().join("-");
+        if (processedPairs.has(pairKey)) return;
+        processedPairs.add(pairKey);
+
+        // Check if person2 also owes person1
+        const reverseAmount = debtMatrix.get(person2)?.get(person1) || 0;
+
+        // Calculate net debt
+        const netAmount = amount1 - reverseAmount;
+
+        if (Math.abs(netAmount) > 0.01) { // Use small threshold to avoid floating point issues
+          if (netAmount > 0) {
+            // person1 owes person2
+            netDebts.push({ from: person1, to: person2, amount: netAmount });
+          } else {
+            // person2 owes person1
+            netDebts.push({ from: person2, to: person1, amount: -netAmount });
+          }
+        }
+      });
     });
 
-    return debts.sort((a, b) => b.amount - a.amount);
+    return netDebts.sort((a, b) => b.amount - a.amount);
   };
 
   const totalDebts = calculateTotalDebts();
