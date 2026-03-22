@@ -12,6 +12,9 @@ function Navigation(): React.JSX.Element {
         <li>
           <Link to="/contact">Friends</Link>
         </li>
+        <li>
+          <Link to="/statistics">Statistics</Link>
+        </li>
       </ul>
     </nav>
   );

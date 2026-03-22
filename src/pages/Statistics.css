@@ -1,0 +1,168 @@
+.statistics-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.statistics-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.statistics-section h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.statistics-section h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.total-summary-section {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bills-breakdown-section {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.debts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.debt-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  border-left: 4px solid #646cff;
+  transition: background-color 0.3s;
+}
+
+.debt-item:hover {
+  background-color: #f0f0f0;
+}
+
+.debt-item.total-debt {
+  border-left-width: 6px;
+  border-left-color: #4caf50;
+  font-weight: 600;
+}
+
+.debt-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.debt-from {
+  font-weight: 600;
+  color: #333;
+}
+
+.debt-arrow {
+  color: #646cff;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.debt-to {
+  font-weight: 600;
+  color: #4caf50;
+}
+
+.debt-amount {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #4caf50;
+  white-space: nowrap;
+}
+
+.bills-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bill-breakdown-card {
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.bill-breakdown-header {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.bill-breakdown-header h4 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.15rem;
+}
+
+.bill-breakdown-info {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.bill-total {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.bill-payer {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.bill-payer::before {
+  content: "•";
+  margin-right: 0.5rem;
+  color: #999;
+}
+
+.no-debts-message,
+.no-bills-message {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #999;
+  font-style: italic;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: white;
+  border-radius: 8px;
+  color: #666;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-style: italic;
+}
