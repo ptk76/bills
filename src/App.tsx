@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Statistics from "./pages/Statistics";
+import MoneyReturns from "./pages/MoneyReturns";
 import "./App.css";
 
 function App(): React.JSX.Element {
@@ -20,6 +21,7 @@ function App(): React.JSX.Element {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/statistics" element={<Statistics />} />
+              <Route path="/money-returns" element={<MoneyReturns />} />
             </Routes>
           </div>
         </div>

@@ -9,7 +9,7 @@ interface Debt {
 }
 
 function Statistics(): React.JSX.Element {
-  const { friends, bills } = useAppContext();
+  const { friends, bills, moneyReturns } = useAppContext();
 
   // Calculate how much each person owes for a specific bill
   const calculateBillDebts = (billId: string): Debt[] => {
@@ -88,6 +88,23 @@ function Statistics(): React.JSX.Element {
           friendDebts.set(payer.name, (friendDebts.get(payer.name) || 0) + personTotal);
         }
       });
+    });
+
+    // Now process money returns to reduce debts
+    moneyReturns.forEach((moneyReturn) => {
+      const fromFriend = friends.find((f) => f.id === moneyReturn.fromFriendId);
+      const toFriend = friends.find((f) => f.id === moneyReturn.toFriendId);
+
+      if (!fromFriend || !toFriend) return;
+
+      // Money return means fromFriend paid back toFriend
+      // This reduces what fromFriend owes toFriend
+      if (!debtMatrix.has(fromFriend.name)) {
+        debtMatrix.set(fromFriend.name, new Map());
+      }
+      const fromDebts = debtMatrix.get(fromFriend.name)!;
+      const currentDebt = fromDebts.get(toFriend.name) || 0;
+      fromDebts.set(toFriend.name, currentDebt - moneyReturn.amount);
     });
 
     // Now calculate net debts

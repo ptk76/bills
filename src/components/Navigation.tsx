@@ -15,6 +15,9 @@ function Navigation(): React.JSX.Element {
         <li>
           <Link to="/statistics">Statistics</Link>
         </li>
+        <li>
+          <Link to="/money-returns">Returns</Link>
+        </li>
       </ul>
     </nav>
   );

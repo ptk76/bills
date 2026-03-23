@@ -32,6 +32,15 @@ export interface Bill {
   createdAt: number;
 }
 
+export interface MoneyReturn {
+  id: string;
+  fromFriendId: string;
+  toFriendId: string;
+  amount: number;
+  description: string;
+  createdAt: number;
+}
+
 interface AppContextType {
   bills: Bill[];
   currentBillId: string | null;
@@ -52,6 +61,9 @@ interface AppContextType {
   paidBy: string | null;
   setTitle: (title: string) => void;
   updatePaidBy: (friendId: string | null) => void;
+  moneyReturns: MoneyReturn[];
+  addMoneyReturn: (moneyReturn: Omit<MoneyReturn, "id" | "createdAt">) => void;
+  deleteMoneyReturn: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -60,6 +72,7 @@ const STORAGE_KEYS = {
   FRIENDS: "bill-manager-friends",
   BILLS: "bill-manager-bills",
   CURRENT_BILL_ID: "bill-manager-current-bill-id",
+  MONEY_RETURNS: "bill-manager-money-returns",
 };
 
 const loadFromLocalStorage = <T,>(key: string, defaultValue: T): T => {
@@ -92,6 +105,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   const [currentBillId, setCurrentBillId] = useState<string | null>(() =>
     loadFromLocalStorage(STORAGE_KEYS.CURRENT_BILL_ID, null),
   );
+  const [moneyReturns, setMoneyReturns] = useState<MoneyReturn[]>(() =>
+    loadFromLocalStorage(STORAGE_KEYS.MONEY_RETURNS, []),
+  );
 
   // Save friends to localStorage whenever they change
   useEffect(() => {
@@ -107,6 +123,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     saveToLocalStorage(STORAGE_KEYS.CURRENT_BILL_ID, currentBillId);
   }, [currentBillId]);
+
+  // Save money returns to localStorage whenever they change
+  useEffect(() => {
+    saveToLocalStorage(STORAGE_KEYS.MONEY_RETURNS, moneyReturns);
+  }, [moneyReturns]);
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
   // const names = friends || [];
@@ -308,6 +329,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     );
   };
 
+  const addMoneyReturn = (
+    moneyReturn: Omit<MoneyReturn, "id" | "createdAt">,
+  ) => {
+    const newMoneyReturn: MoneyReturn = {
+      ...moneyReturn,
+      id: Date.now().toString(),
+      createdAt: Date.now(),
+    };
+    setMoneyReturns([...moneyReturns, newMoneyReturn]);
+  };
+
+  const deleteMoneyReturn = (id: string) => {
+    setMoneyReturns(moneyReturns.filter((mr) => mr.id !== id));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -330,6 +366,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
         paidBy,
         setTitle,
         updatePaidBy,
+        moneyReturns,
+        addMoneyReturn,
+        deleteMoneyReturn,
       }}
     >
       {children}
