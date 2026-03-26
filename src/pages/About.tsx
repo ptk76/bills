@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Item, Split, useAppContext } from "../context/AppContext";
+import { Item, useAppContext } from "../context/AppContext";
 import "./About.css";
 
 function About(): React.JSX.Element {
@@ -87,12 +87,6 @@ function About(): React.JSX.Element {
     } else if (e.key === "Escape") {
       cancelEditing();
     }
-  };
-
-  const calculateItemTotal = (itemId: string): number => {
-    const item = items.find((i) => i.id === itemId);
-    if (!item || item.checkedNames.length === 0) return 0;
-    return (item.price * item.quantity) / item.checkedNames.length;
   };
 
   const calculatePersonTotal = (friendId: string): number => {
