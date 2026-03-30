@@ -7,154 +7,174 @@ import React, {
 } from "react";
 
 export interface Friend {
-  id: string;
-  name: string;
+  id: number;
+  nick: string;
 }
 
 export interface Split {
-  friendId: string;
+  id: number;
+  item_id: number;
+  friend_id: number;
   quantity: number;
 }
 
 export interface Item {
-  id: string;
-  name: string;
+  id: number;
+  title: string;
   price: number;
   quantity: number;
-  checkedNames: Split[];
+  bill_id: number;
+  split_id: number;
 }
 
 export interface Bill {
-  id: string;
+  id: number;
   title: string;
-  paidBy: string | null;
-  items: Item[];
-  createdAt: number;
+  paidBy: number | null;
 }
 
 export interface MoneyReturn {
-  id: string;
-  fromFriendId: string;
-  toFriendId: string;
+  id: number;
+  from_friend_it: number;
+  to_friend_id: number;
+  title: string;
   amount: number;
-  description: string;
-  createdAt: number;
 }
 
 interface AppContextType {
   bills: Bill[];
-  currentBillId: string | null;
+  currentBillId: number | null;
   currentBill: Bill | null;
   createBill: (title: string) => void;
-  deleteBill: (billId: string) => void;
-  selectBill: (billId: string) => void;
+  deleteBill: (billId: number) => void;
+  selectBill: (billId: number) => void;
   updateBillTitle: (title: string) => void;
+
   friends: Friend[];
   addFriend: (name: string) => void;
-  deleteFriend: (id: string) => void;
+  deleteFriend: (id: number) => void;
+
   items: Item[];
-  addItem: (item: Omit<Item, "id">) => void;
-  updateItem: (id: string, updates: Partial<Omit<Item, "id">>) => void;
-  deleteItem: (id: string) => void;
-  toggleNameInItem: (itemId: string, name: string) => void;
+  addItem: (item: Omit<Item, "id" | "split_id">) => void;
+  updateItem: (id: number, updates: Partial<Omit<Item, "id">>) => void;
+  deleteItem: (id: number) => void;
+  toggleNameInItem: (itemId: number, name: number) => void;
   title: string;
-  paidBy: string | null;
+  paidBy: number | null;
   setTitle: (title: string) => void;
-  updatePaidBy: (friendId: string | null) => void;
+  updatePaidBy: (friendId: number | null) => void;
   moneyReturns: MoneyReturn[];
   addMoneyReturn: (moneyReturn: Omit<MoneyReturn, "id" | "createdAt">) => void;
-  deleteMoneyReturn: (id: string) => void;
+  deleteMoneyReturn: (id: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEYS = {
-  FRIENDS: "bill-manager-friends",
-  BILLS: "bill-manager-bills",
-  CURRENT_BILL_ID: "bill-manager-current-bill-id",
-  MONEY_RETURNS: "bill-manager-money-returns",
-};
+// const STORAGE_KEYS = {
+//   FRIENDS: "bill-manager-friends",
+//   BILLS: "bill-manager-bills",
+//   CURRENT_BILL_ID: "bill-manager-current-bill-id",
+//   MONEY_RETURNS: "bill-manager-money-returns",
+// };
 
-const loadFromLocalStorage = <T,>(key: string, defaultValue: T): T => {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
-  } catch (error) {
-    console.error(`Error loading ${key} from localStorage:`, error);
-    return defaultValue;
-  }
-};
+// const saveToLocalStorage = (key: string, value: any): void => {
+//   try {
+//     localStorage.setItem(key, JSON.stringify(value));
+//   } catch (error) {
+//     console.error(`Error saving ${key} to localStorage:`, error);
+//   }
+// };
 
-const saveToLocalStorage = (key: string, value: any): void => {
+const queryDatabase = async (api: string): Promise<unknown[]> => {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.error(`Error saving ${key} to localStorage:`, error);
-  }
+    const friends = await fetch(api);
+    return await friends.json();
+  } catch (_) {}
+  return [];
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [friends, setFriends] = useState<Friend[]>(() =>
-    loadFromLocalStorage(STORAGE_KEYS.FRIENDS, []),
-  );
-  const [bills, setBills] = useState<Bill[]>(() =>
-    loadFromLocalStorage(STORAGE_KEYS.BILLS, []),
-  );
-  const [currentBillId, setCurrentBillId] = useState<string | null>(() =>
-    loadFromLocalStorage(STORAGE_KEYS.CURRENT_BILL_ID, null),
-  );
-  const [moneyReturns, setMoneyReturns] = useState<MoneyReturn[]>(() =>
-    loadFromLocalStorage(STORAGE_KEYS.MONEY_RETURNS, []),
-  );
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [currentBillId, setCurrentBillId] = useState<number | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
+
+  const [moneyReturns, setMoneyReturns] = useState<MoneyReturn[]>([]);
+
+  const initData = async () => {
+    setFriends((await queryDatabase("/friends")) as Friend[]);
+    const _bills = (await queryDatabase("/bills")) as Bill[];
+    setBills(_bills);
+    const currentBill = _bills[0] ? _bills[0].id : null;
+    setCurrentBillId(currentBill);
+    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    const i = (await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[];
+    console.log("init ITEMS", i);
+    setItems((await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[]);
+  };
+
+  const loadItems = async () => {
+    console.log("currentBillId", currentBillId);
+    const i = (await queryDatabase(
+      `/items?bill_id=${currentBillId}`,
+    )) as Item[];
+    console.log("ITEMS", i);
+    setItems(
+      (await queryDatabase(`/items?bill_id=${currentBillId}`)) as Item[],
+    );
+  };
+
+  useEffect(() => {
+    initData();
+  }, []);
 
   // Save friends to localStorage whenever they change
   useEffect(() => {
-    saveToLocalStorage(STORAGE_KEYS.FRIENDS, friends);
+    // saveToLocalStorage(STORAGE_KEYS.FRIENDS, friends);
   }, [friends]);
 
   // Save bills to localStorage whenever they change
   useEffect(() => {
-    saveToLocalStorage(STORAGE_KEYS.BILLS, bills);
+    // saveToLocalStorage(STORAGE_KEYS.BILLS, bills);
   }, [bills]);
 
   // Save current bill ID to localStorage whenever it changes
   useEffect(() => {
-    saveToLocalStorage(STORAGE_KEYS.CURRENT_BILL_ID, currentBillId);
+    // saveToLocalStorage(STORAGE_KEYS.CURRENT_BILL_ID, currentBillId);
+    loadItems();
   }, [currentBillId]);
 
   // Save money returns to localStorage whenever they change
   useEffect(() => {
-    saveToLocalStorage(STORAGE_KEYS.MONEY_RETURNS, moneyReturns);
+    // saveToLocalStorage(STORAGE_KEYS.MONEY_RETURNS, moneyReturns);
   }, [moneyReturns]);
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
   // const names = friends || [];
-  const items = currentBill?.items || [];
+  // const items = currentBill?.items || [];
   const title = currentBill?.title || "Items & Billing";
   const paidBy = currentBill?.paidBy || null;
 
   const createBill = (billTitle: string) => {
     const newBill: Bill = {
-      id: Date.now().toString(),
+      id: -1,
       title: billTitle.trim() || "New Bill",
-      paidBy: "",
-      items: [],
-      createdAt: Date.now(),
+      paidBy: null,
     };
     setBills([...bills, newBill]);
     setCurrentBillId(newBill.id);
   };
 
-  const deleteBill = (billId: string) => {
+  const deleteBill = (billId: number) => {
     setBills(bills.filter((b) => b.id !== billId));
     if (currentBillId === billId) {
       setCurrentBillId(bills.length > 1 ? bills[0].id : null);
     }
   };
 
-  const selectBill = (billId: string) => {
+  const selectBill = (billId: number) => {
     setCurrentBillId(billId);
   };
 
@@ -171,125 +191,127 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     updateBillTitle(newTitle);
   };
 
-  const addFriend = (name: string) => {
+  const addFriend = async (name: string) => {
     if (name.trim() === "") return;
 
-    const newFriend: Friend = {
-      id: Date.now().toString(),
-      name: name,
-    };
-
-    setFriends([...friends, newFriend]);
+    queryDatabase(`/friends?cmd=add&nick=${name}`);
   };
 
-  const deleteFriend = (friendId: string) => {
-    setBills(
-      bills.map((bill) => ({
-        ...bill,
-        items: bill.items.map((item) => ({
-          ...item,
-          checkedNames: item.checkedNames.filter(
-            (split) => split.friendId !== friendId,
-          ),
-        })),
-      })),
-    );
-    setFriends(friends.filter((f) => f.id !== friendId));
+  const deleteFriend = (friendId: number) => {
+    queryDatabase(`/friends?cmd=del&id=${friendId}`);
+
+    // TODO
+    // setBills(
+    //   bills.map((bill) => ({
+    //     ...bill,
+    //     items: bill.items.map((item) => ({
+    //       ...item,
+    //       checkedNames: item.checkedNames.filter(
+    //         (split) => split.friendId !== friendId,
+    //       ),
+    //     })),
+    //   })),
+    // );
+    // setFriends(friends.filter((f) => f.id !== friendId));
   };
 
-  const addItem = (item: Omit<Item, "id">) => {
-    const newItem: Item = {
-      ...item,
-      id: Date.now().toString(),
-    };
-
-    // If no bill exists or no bill is selected, create a default bill
-    if (!currentBillId || bills.length === 0) {
-      const newBill: Bill = {
-        id: Date.now().toString(),
-        title: "My Bill",
-        paidBy: "",
-        items: [newItem],
-        createdAt: Date.now(),
-      };
-      setBills([...bills, newBill]);
-      setCurrentBillId(newBill.id);
-      return;
-    }
-
-    setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId
-          ? { ...bill, items: [...bill.items, newItem] }
-          : bill,
-      ),
-    );
+  const addItem = (item: Omit<Item, "id" | "split_id">) => {
+    // TODO
+    // const newItem: Item = {
+    //   ...item,
+    //   id: Date.now().toString(),
+    // };
+    // // If no bill exists or no bill is selected, create a default bill
+    // if (!currentBillId || bills.length === 0) {
+    //   const newBill: Bill = {
+    //     id: Date.now().toString(),
+    //     title: "My Bill",
+    //     paidBy: "",
+    //     items: [newItem],
+    //     createdAt: Date.now(),
+    //   };
+    //   setBills([...bills, newBill]);
+    //   setCurrentBillId(newBill.id);
+    //   return;
+    // }
+    // setBills(
+    //   bills.map((bill) =>
+    //     bill.id === currentBillId
+    //       ? { ...bill, items: [...bill.items, newItem] }
+    //       : bill,
+    //   ),
+    // );
   };
 
-  const updateItem = (id: string, updates: Partial<Omit<Item, "id">>) => {
-    if (!currentBillId) return;
-    setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId
-          ? {
-              ...bill,
-              items: bill.items.map((item) =>
-                item.id === id ? { ...item, ...updates } : item,
-              ),
-            }
-          : bill,
-      ),
-    );
+  const updateItem = (
+    id: number,
+    updates: Partial<Omit<Item, "id" | "split_id">>,
+  ) => {
+    // TODO
+    // if (!currentBillId) return;
+    // setBills(
+    //   bills.map((bill) =>
+    //     bill.id === currentBillId
+    //       ? {
+    //           ...bill,
+    //           items: bill.items.map((item) =>
+    //             item.id === id ? { ...item, ...updates } : item,
+    //           ),
+    //         }
+    //       : bill,
+    //   ),
+    // );
   };
 
-  const deleteItem = (id: string) => {
-    if (!currentBillId) return;
-    setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId
-          ? { ...bill, items: bill.items.filter((item) => item.id !== id) }
-          : bill,
-      ),
-    );
+  const deleteItem = (id: number) => {
+    // TODO
+    // if (!currentBillId) return;
+    // setBills(
+    //   bills.map((bill) =>
+    //     bill.id === currentBillId
+    //       ? { ...bill, items: bill.items.filter((item) => item.id !== id) }
+    //       : bill,
+    //   ),
+    // );
   };
 
-  const toggleNameInItem = (itemId: string, friendId: string) => {
-    if (!currentBillId) return;
-    setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId
-          ? {
-              ...bill,
-              items: bill.items.map((item) => {
-                if (item.id === itemId) {
-                  if (
-                    !item.checkedNames.find(
-                      (split) => split.friendId === friendId,
-                    )
-                  ) {
-                    item.checkedNames.push({ friendId: friendId, quantity: 0 });
-                  }
-                }
-
-                return item.id === itemId
-                  ? {
-                      ...item,
-                      checkedNames: item.checkedNames.map((split) =>
-                        split.friendId === friendId
-                          ? {
-                              ...split,
-                              quantity:
-                                (split.quantity + 1) % (item.quantity + 1),
-                            }
-                          : split,
-                      ),
-                    }
-                  : item;
-              }),
-            }
-          : bill,
-      ),
-    );
+  const toggleNameInItem = (itemId: number, friendId: number) => {
+    // TODO
+    // if (!currentBillId) return;
+    // setBills(
+    //   bills.map((bill) =>
+    //     bill.id === currentBillId
+    //       ? {
+    //           ...bill,
+    //           items: bill.items.map((item) => {
+    //             if (item.id === itemId) {
+    //               if (
+    //                 !item.checkedNames.find(
+    //                   (split) => split.friendId === friendId,
+    //                 )
+    //               ) {
+    //                 item.checkedNames.push({ friendId: friendId, quantity: 0 });
+    //               }
+    //             }
+    //             return item.id === itemId
+    //               ? {
+    //                   ...item,
+    //                   checkedNames: item.checkedNames.map((split) =>
+    //                     split.friendId === friendId
+    //                       ? {
+    //                           ...split,
+    //                           quantity:
+    //                             (split.quantity + 1) % (item.quantity + 1),
+    //                         }
+    //                       : split,
+    //                   ),
+    //                 }
+    //               : item;
+    //           }),
+    //         }
+    //       : bill,
+    //   ),
+    // );
   };
 
   // const toggleNameInItem = (itemId: string, friendId: string) => {
@@ -321,27 +343,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   //   );
   // };
 
-  const updatePaidBy = (friendId: string | null) => {
-    setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId ? { ...bill, paidBy: friendId } : bill,
-      ),
-    );
+  const updatePaidBy = (friendId: number | null) => {
+    // TODO
+    // setBills(
+    //   bills.map((bill) =>
+    //     bill.id === currentBillId ? { ...bill, paidBy: friendId } : bill,
+    //   ),
+    // );
   };
 
   const addMoneyReturn = (
     moneyReturn: Omit<MoneyReturn, "id" | "createdAt">,
   ) => {
-    const newMoneyReturn: MoneyReturn = {
-      ...moneyReturn,
-      id: Date.now().toString(),
-      createdAt: Date.now(),
-    };
-    setMoneyReturns([...moneyReturns, newMoneyReturn]);
+    // TODO
+    // const newMoneyReturn: MoneyReturn = {
+    //   ...moneyReturn,
+    //   id: Date.now().toString(),
+    //   createdAt: Date.now(),
+    // };
+    // setMoneyReturns([...moneyReturns, newMoneyReturn]);
   };
 
-  const deleteMoneyReturn = (id: string) => {
-    setMoneyReturns(moneyReturns.filter((mr) => mr.id !== id));
+  const deleteMoneyReturn = (id: number) => {
+    // TODO
+    // setMoneyReturns(moneyReturns.filter((mr) => mr.id !== id));
   };
 
   return (

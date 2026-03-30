@@ -4,6 +4,7 @@ import "./About.css";
 
 function About(): React.JSX.Element {
   const {
+    currentBillId,
     friends,
     items,
     addItem,
@@ -18,7 +19,7 @@ function About(): React.JSX.Element {
   const [itemName, setItemName] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
   const [itemQuantity, setItemQuantity] = useState<string>("1");
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [editName, setEditName] = useState<string>("");
   const [editPrice, setEditPrice] = useState<string>("");
   const [editQuantity, setEditQuantity] = useState<string>("1");
@@ -31,10 +32,10 @@ function About(): React.JSX.Element {
       const quantity = parseInt(itemQuantity);
       if (!isNaN(price) && price > 0) {
         addItem({
-          name: itemName.trim(),
+          title: itemName.trim(),
           price: price,
           quantity: quantity,
-          checkedNames: [],
+          bill_id: currentBillId ?? 0,
         });
         setItemName("");
         setItemPrice("");
@@ -49,11 +50,11 @@ function About(): React.JSX.Element {
     }
   };
 
-  const startEditing = (itemId: string) => {
+  const startEditing = (itemId: number) => {
     const item = items.find((i) => i.id === itemId);
     if (item) {
       setEditingItemId(itemId);
-      setEditName(item.name);
+      setEditName(item.title);
       setEditPrice(item.price.toString());
       setEditQuantity(item.quantity.toString());
     }
@@ -72,7 +73,7 @@ function About(): React.JSX.Element {
       const quantity = parseInt(editQuantity);
       if (!isNaN(price) && price > 0) {
         updateItem(editingItemId, {
-          name: editName.trim(),
+          title: editName.trim(),
           price: price,
           quantity: quantity,
         });
@@ -89,22 +90,24 @@ function About(): React.JSX.Element {
     }
   };
 
-  const calculatePersonTotal = (friendId: string): number => {
-    const personSplits = items.reduce((prev, item) => {
-      const allSplit = item.checkedNames.reduce(
-        (prev, split) => prev + split.quantity,
-        0,
-      );
-      const friendSplit = item.checkedNames.reduce(
-        (prev, split) =>
-          split.friendId === friendId ? prev + split.quantity : prev,
-        0,
-      );
-      if (allSplit === 0) return prev;
-      return prev + (item.price * item.quantity * friendSplit) / allSplit;
-    }, 0);
+  const calculatePersonTotal = (friendId: number): number => {
+    // const personSplits = items.reduce((prev, item) => {
+    //   const allSplit = item.checkedNames.reduce(
+    //     (prev, split) => prev + split.quantity,
+    //     0,
+    //   );
+    //   const friendSplit = item.checkedNames.reduce(
+    //     (prev, split) =>
+    //       split.friendId === friendId ? prev + split.quantity : prev,
+    //     0,
+    //   );
+    //   if (allSplit === 0) return prev;
+    //   return prev + (item.price * item.quantity * friendSplit) / allSplit;
+    // }, 0);
 
-    return personSplits;
+    // return personSplits;
+    // TODO
+    return 0;
   };
 
   const calculateTotalPrice = (): number => {
@@ -136,19 +139,21 @@ function About(): React.JSX.Element {
     }
   };
 
-  const calculateItemSplitByFriend = (item: Item, friendId: string) => {
-    const totalParts = item.checkedNames.reduce(
-      (sum, split) => sum + split.quantity,
-      0,
-    );
-    const friendSplit = item.checkedNames.find(
-      (split) => split.friendId === friendId,
-    );
-    const friendParts = friendSplit?.quantity ?? 0;
+  const calculateItemSplitByFriend = (item: Item, friendId: number) => {
+    // const totalParts = item.checkedNames.reduce(
+    //   (sum, split) => sum + split.quantity,
+    //   0,
+    // );
+    // const friendSplit = item.checkedNames.find(
+    //   (split) => split.friendId === friendId,
+    // );
+    // const friendParts = friendSplit?.quantity ?? 0;
 
-    return friendParts !== 0
-      ? ((item.price * item.quantity) / totalParts) * friendParts
-      : 0;
+    // return friendParts !== 0
+    //   ? ((item.price * item.quantity) / totalParts) * friendParts
+    //   : 0;
+    // TODO
+    return 0;
   };
 
   return (
@@ -216,7 +221,7 @@ function About(): React.JSX.Element {
                         onChange={() => updatePaidBy(friend.id)}
                         className="person-radio"
                       />
-                      <span className="person-name">{friend.name}</span>
+                      <span className="person-name">{friend.nick}</span>
                     </div>
                     <span className="person-total">{total.toFixed(2)} €</span>
                   </div>
@@ -324,7 +329,7 @@ function About(): React.JSX.Element {
                   <>
                     <div className="item-header">
                       <div className="item-info">
-                        <h3>{item.name}</h3>
+                        <h3>{item.title}</h3>
                       </div>
                       <div className="item-actions">
                         <button
@@ -362,7 +367,7 @@ function About(): React.JSX.Element {
                               }
                             >
                               <div className="checkbox-name">
-                                <div>{friend.name}</div>
+                                <div>{friend.nick}</div>
                                 <span
                                   className={
                                     calculateItemSplitByFriend(
@@ -373,11 +378,12 @@ function About(): React.JSX.Element {
                                       : "checkbox-quantity"
                                   }
                                 >
-                                  {
+                                  TODO
+                                  {/* {
                                     item.checkedNames.find(
                                       (split) => split.friendId === friend.id,
                                     )?.quantity
-                                  }
+                                  } */}
                                 </span>
                                 <span
                                   className={

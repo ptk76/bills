@@ -1,45 +1,60 @@
+function getNumber(searchParams: URLSearchParams, name: string) {
+  if (searchParams.has(name)) {
+    const int = parseInt(searchParams.get(name)!);
+    if (!isNaN(int)) return int;
+  }
+  return undefined;
+}
+
+function prepareSqlQuery(urlStr: string) {
+  const url = new URL(urlStr);
+  if (url.pathname.startsWith("/friends")) {
+    const cmd = url.searchParams.get("cmd");
+    if (cmd === "del") {
+      const id = getNumber(url.searchParams, "id");
+      if (id === undefined) return null;
+      return `DELETE FROM friends WHERE friends.id = ${id}`;
+    }
+    if (cmd === "add") {
+      const nick = url.searchParams.get("nick");
+      if (nick === undefined) return null;
+      return `INSERT INTO friends (nick) VALUES ("${nick}")`;
+    }
+
+    return "SELECT * FROM friends";
+  }
+
+  if (url.pathname.startsWith("/bills")) {
+    return "SELECT * FROM bills";
+  }
+
+  if (url.pathname.startsWith("/returns")) {
+    return "SELECT * FROM returns";
+  }
+
+  if (url.pathname.startsWith("/items")) {
+    let bill_id = 0;
+    if (url.searchParams.has("bill_id")) {
+      const id = parseInt(url.searchParams.get("bill_id")!);
+      if (!isNaN(id)) bill_id = id;
+    }
+    return `SELECT * FROM items WHERE items.bill_id=${bill_id}`;
+  }
+  return null;
+}
+
 export default {
   async fetch(request: Request, env: Env) {
-    const url = new URL(request.url);
+    const sqlQuery = prepareSqlQuery(request.url);
+    console.log("QUERY", sqlQuery);
+    if (!sqlQuery) return new Response(null, { status: 404 });
 
-    if (url.pathname.startsWith("/db/friends")) {
-      const stmt = env.DB.prepare("SELECT * FROM friends");
-      const { results } = await stmt.all();
-      return new Response(JSON.stringify(results, null, 2), {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
-
-    if (url.pathname.startsWith("/db/bills")) {
-      const stmt = env.DB.prepare("SELECT * FROM bills");
-      const { results } = await stmt.all();
-      return new Response(JSON.stringify(results, null, 2), {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
-
-    if (url.pathname.startsWith("/db/bill")) {
-      let bill_id = 0;
-      if (url.searchParams.has("id")) {
-        const id = parseInt(url.searchParams.get("id")!);
-        if (!isNaN(id)) bill_id = id;
-      }
-      console.log(url.searchParams.has);
-      const stmt = env.DB.prepare(
-        `SELECT * FROM items WHERE items.bill_id=${bill_id}`,
-      );
-      const { results } = await stmt.all();
-      return new Response(JSON.stringify(results, null, 2), {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
-
-    return new Response(null, { status: 404 });
+    const stmt = env.DB.prepare(sqlQuery);
+    const { results } = await stmt.all();
+    return new Response(JSON.stringify(results), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   },
 } satisfies ExportedHandler<Env>;

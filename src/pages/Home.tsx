@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Item, useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
@@ -34,20 +34,23 @@ function Home(): React.JSX.Element {
     }
   };
 
-  const calculateBillTotal = (billId: string): number => {
+  const calculateBillTotal = (billId: number): number => {
     const bill = bills.find((b) => b.id === billId);
     if (!bill) return 0;
-    return bill.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0,
-    );
+    // TODO
+    // return bill.items.reduce(
+    //   (total, item) => total + item.price * item.quantity,
+    //   0,
+    // );
+    return 0;
   };
 
   const countPeople = (items: Item[]) => {
     const people = new Set<String>();
-    items.forEach((item) =>
-      item.checkedNames.forEach((split) => people.add(split.friendId)),
-    );
+    // TODO
+    // items.forEach((item) =>
+    //   item.checkedNames.forEach((split) => people.add(split.friendId)),
+    // );
     return people.size;
   };
   return (
@@ -89,7 +92,8 @@ function Home(): React.JSX.Element {
                   <div className="bill-info">
                     <div className="bill-stats">
                       <span className="stat-item">
-                        <strong>{bill.items.length}</strong> items
+                        <strong>TODO</strong> items
+                        {/* <strong>{bill.items.length}</strong> items */}
                       </span>
                       <span className="stat-item">
                         <strong>{countPeople(bill.items)}</strong> people
@@ -98,7 +102,7 @@ function Home(): React.JSX.Element {
                         Paid by:{" "}
                         <strong>
                           {friends.find((friend) => friend.id === bill.paidBy)
-                            ?.name ?? (
+                            ?.nick ?? (
                             <strong className="paid-by-none">NONE</strong>
                           )}
                         </strong>

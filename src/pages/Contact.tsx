@@ -11,7 +11,7 @@ function Contact(): React.JSX.Element {
     setInputValue("");
   };
 
-  const handleDeleteName = (id: string) => {
+  const handleDeleteName = (id: number) => {
     deleteFriend(id);
   };
 
@@ -44,7 +44,7 @@ function Contact(): React.JSX.Element {
           <ul className="names-list">
             {friends.map((friend) => (
               <li key={friend.id} className="name-item">
-                <span className="name-text">{friend.name}</span>
+                <span className="name-text">{friend.nick}</span>
                 <button
                   onClick={() => handleDeleteName(friend.id)}
                   className="delete-button"
