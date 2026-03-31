@@ -1,50 +1,54 @@
-function getNumber(searchParams: URLSearchParams, name: string) {
-  if (searchParams.has(name)) {
-    const int = parseInt(searchParams.get(name)!);
+function getNumber(params: URLSearchParams, name: string) {
+  if (params.has(name)) {
+    const int = parseInt(params.get(name)!);
     if (!isNaN(int)) return int;
   }
   return undefined;
 }
 
+function friends(params: URLSearchParams) {
+  const cmd = params.get("cmd");
+  if (cmd === "del") {
+    const id = getNumber(params, "id");
+    if (id === undefined) return null;
+    return `
+      DELETE FROM friends WHERE friends.id = ${id};
+      DELETE FROM splits WHERE splits.friend_id = ${id};
+      DELETE FROM returns WHERE returns.from_friend_id = ${id} OR returns.to_friend_id = ${id};
+      UPDATE bills SET paid_by = NULL WHERE paid_by = ${id};
+    `;
+  }
+  if (cmd === "add") {
+    const nick = params.get("nick");
+    if (nick === undefined) return null;
+    return `INSERT INTO friends (nick) VALUES ("${nick}")`;
+  }
+
+  return "SELECT * FROM friends";
+}
+
+function bills(params: URLSearchParams) {
+  return "SELECT * FROM bills";
+}
+
+function returns(params: URLSearchParams) {
+  return "SELECT * FROM returns";
+}
+
+function items(params: URLSearchParams) {
+  if (params.has("bill_id")) {
+    const id = parseInt(params.get("bill_id")!);
+    if (!isNaN(id)) return `SELECT * FROM items WHERE items.bill_id=${id}`;
+  }
+  return null;
+}
+
 function prepareSqlQuery(urlStr: string) {
   const url = new URL(urlStr);
-  if (url.pathname.startsWith("/friends")) {
-    const cmd = url.searchParams.get("cmd");
-    if (cmd === "del") {
-      const id = getNumber(url.searchParams, "id");
-      if (id === undefined) return null;
-      return `
-        DELETE FROM friends WHERE friends.id = ${id};
-        DELETE FROM splits WHERE splits.friend_id = ${id};
-        DELETE FROM returns WHERE returns.from_friend_id = ${id} OR returns.to_friend_id = ${id};
-        UPDATE bills SET paid_by = NULL WHERE paid_by = ${id};
-      `;
-    }
-    if (cmd === "add") {
-      const nick = url.searchParams.get("nick");
-      if (nick === undefined) return null;
-      return `INSERT INTO friends (nick) VALUES ("${nick}")`;
-    }
-
-    return "SELECT * FROM friends";
-  }
-
-  if (url.pathname.startsWith("/bills")) {
-    return "SELECT * FROM bills";
-  }
-
-  if (url.pathname.startsWith("/returns")) {
-    return "SELECT * FROM returns";
-  }
-
-  if (url.pathname.startsWith("/items")) {
-    let bill_id = 0;
-    if (url.searchParams.has("bill_id")) {
-      const id = parseInt(url.searchParams.get("bill_id")!);
-      if (!isNaN(id)) bill_id = id;
-    }
-    return `SELECT * FROM items WHERE items.bill_id=${bill_id}`;
-  }
+  if (url.pathname.startsWith("/friends")) return friends(url.searchParams);
+  if (url.pathname.startsWith("/bills")) return bills(url.searchParams);
+  if (url.pathname.startsWith("/returns")) return returns(url.searchParams);
+  if (url.pathname.startsWith("/items")) return items(url.searchParams);
   return null;
 }
 
