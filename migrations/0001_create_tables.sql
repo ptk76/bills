@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS splits (
 -- Returns
 CREATE TABLE IF NOT EXISTS returns (
     id INTEGER PRIMARY KEY NOT NULL,
-    from_friend_it INTEGER NOT NULL,
+    from_friend_id INTEGER NOT NULL,
     to_friend_id INTEGER NOT NULL,
     title TEXT,
     amount INTEGER NOT NULL

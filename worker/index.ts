@@ -13,7 +13,12 @@ function prepareSqlQuery(urlStr: string) {
     if (cmd === "del") {
       const id = getNumber(url.searchParams, "id");
       if (id === undefined) return null;
-      return `DELETE FROM friends WHERE friends.id = ${id}`;
+      return `
+        DELETE FROM friends WHERE friends.id = ${id};
+        DELETE FROM splits WHERE splits.friend_id = ${id};
+        DELETE FROM returns WHERE returns.from_friend_id = ${id} OR returns.to_friend_id = ${id};
+        UPDATE bills SET paid_by = NULL WHERE paid_by = ${id};
+      `;
     }
     if (cmd === "add") {
       const nick = url.searchParams.get("nick");

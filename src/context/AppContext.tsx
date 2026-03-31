@@ -193,26 +193,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 
   const addFriend = async (name: string) => {
     if (name.trim() === "") return;
+    setQueryInProgress(true);
 
-    queryDatabase(`/friends?cmd=add&nick=${name}`);
+    await queryDatabase(`/friends?cmd=add&nick=${name}`);
+    setFriends((await queryDatabase("/friends")) as Friend[]);
+    setQueryInProgress(false);
   };
 
-  const deleteFriend = (friendId: number) => {
+  const deleteFriend = async (friendId: number) => {
+    setQueryInProgress(true);
     queryDatabase(`/friends?cmd=del&id=${friendId}`);
-
-    // TODO
-    // setBills(
-    //   bills.map((bill) => ({
-    //     ...bill,
-    //     items: bill.items.map((item) => ({
-    //       ...item,
-    //       checkedNames: item.checkedNames.filter(
-    //         (split) => split.friendId !== friendId,
-    //       ),
-    //     })),
-    //   })),
-    // );
-    // setFriends(friends.filter((f) => f.id !== friendId));
+    setFriends((await queryDatabase("/friends")) as Friend[]);
+    setBills((await queryDatabase("/bills")) as Bill[]);
+    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    setQueryInProgress(false);
   };
 
   const addItem = (item: Omit<Item, "id" | "split_id">) => {
