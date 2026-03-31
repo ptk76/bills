@@ -42,6 +42,7 @@ export interface MoneyReturn {
 }
 
 interface AppContextType {
+  queryInProgress: boolean;
   bills: Bill[];
   currentBillId: number | null;
   currentBill: Bill | null;
@@ -96,6 +97,7 @@ const queryDatabase = async (api: string): Promise<unknown[]> => {
 export const AppProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const [queryInProgress, setQueryInProgress] = useState<boolean>(true);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [currentBillId, setCurrentBillId] = useState<number | null>(null);
@@ -113,6 +115,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     const i = (await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[];
     console.log("init ITEMS", i);
     setItems((await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[]);
+    setQueryInProgress(false);
   };
 
   const loadItems = async () => {
@@ -366,6 +369,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <AppContext.Provider
       value={{
+        queryInProgress,
         bills,
         currentBillId,
         currentBill,

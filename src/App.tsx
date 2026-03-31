@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AppProvider } from "./context/AppContext";
+import { useAppContext } from "./context/AppContext";
 import Navigation from "./components/Navigation";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -10,23 +10,23 @@ import MoneyReturns from "./pages/MoneyReturns";
 import "./App.css";
 
 function App(): React.JSX.Element {
+  const { queryInProgress } = useAppContext();
   return (
-    <AppProvider>
-      <Router>
-        <div className="app">
-          <Navigation />
-          <div className="content">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/statistics" element={<Statistics />} />
-              <Route path="/money-returns" element={<MoneyReturns />} />
-            </Routes>
-          </div>
+    <Router>
+      <div className="app">
+        {queryInProgress && <div className="loader"></div>}
+        <Navigation />
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/money-returns" element={<MoneyReturns />} />
+          </Routes>
         </div>
-      </Router>
-    </AppProvider>
+      </div>
+    </Router>
   );
 }
 
