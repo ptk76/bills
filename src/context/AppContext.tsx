@@ -94,8 +94,9 @@ const queryDatabase = async (api: string): Promise<unknown[]> => {
   return [];
 };
 
-export const AppProvider: React.FC<{ children: ReactNode }> = ({
+export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   children,
+  token,
 }) => {
   const [queryInProgress, setQueryInProgress] = useState<boolean>(true);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -160,34 +161,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   const title = currentBill?.title || "Items & Billing";
   const paidBy = currentBill?.paidBy || null;
 
-  const createBill = (billTitle: string) => {
-    const newBill: Bill = {
-      id: -1,
-      title: billTitle.trim() || "New Bill",
-      paidBy: null,
-    };
-    setBills([...bills, newBill]);
-    setCurrentBillId(newBill.id);
+  const createBill = async (billTitle: string) => {
+    setQueryInProgress(true);
+    const title = billTitle.trim() || "New Bill";
+    await queryDatabase(`/bills?cmd=add&title=${title}&token=${token}`);
+    const _bills = (await queryDatabase("/bills")) as Bill[];
+    setBills(_bills);
+    const currentBill = _bills[0] ? _bills[0].id : null;
+    setCurrentBillId(currentBill);
+
+    setQueryInProgress(false);
   };
 
-  const deleteBill = (billId: number) => {
-    setBills(bills.filter((b) => b.id !== billId));
-    if (currentBillId === billId) {
-      setCurrentBillId(bills.length > 1 ? bills[0].id : null);
-    }
+  const deleteBill = async (billId: number) => {
+    setQueryInProgress(true);
+    await queryDatabase(`/bills?cmd=del&id=${billId}`);
+    const _bills = (await queryDatabase("/bills")) as Bill[];
+    setBills(_bills);
+    const currentBill = _bills[0] ? _bills[0].id : null;
+    setCurrentBillId(currentBill);
+    setQueryInProgress(false);
   };
 
   const selectBill = (billId: number) => {
     setCurrentBillId(billId);
   };
 
-  const updateBillTitle = (newTitle: string) => {
+  const updateBillTitle = async (newTitle: string) => {
     if (!currentBillId) return;
-    setBills(
-      bills.map((bill) =>
-        bill.id === currentBillId ? { ...bill, title: newTitle } : bill,
-      ),
-    );
+    setQueryInProgress(true);
+    await queryDatabase(`/bills?id=${currentBillId}&cmd=upd&title=${newTitle}`);
+    setBills((await queryDatabase("/bills")) as Bill[]);
+    setQueryInProgress(false);
   };
 
   const setTitle = (newTitle: string) => {
@@ -340,13 +345,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   //   );
   // };
 
-  const updatePaidBy = (friendId: number | null) => {
-    // TODO
-    // setBills(
-    //   bills.map((bill) =>
-    //     bill.id === currentBillId ? { ...bill, paidBy: friendId } : bill,
-    //   ),
-    // );
+  const updatePaidBy = async (friendId: number | null) => {
+    setQueryInProgress(true);
+    await queryDatabase(
+      `/bills?id=${currentBillId}&cmd=upd&paid_by=${friendId}`,
+    );
+    setBills((await queryDatabase("/bills")) as Bill[]);
+    setQueryInProgress(false);
   };
 
   const addMoneyReturn = (

@@ -23,6 +23,32 @@ function friends(params: URLSearchParams) {
 }
 
 function bills(params: URLSearchParams) {
+  if (params.get("cmd") === "add") {
+    const title = params.get("title");
+    const token = params.get("token");
+    if (!title || !token) return null;
+    return `INSERT INTO bills (title, token) VALUES ("${title}", "${token}")`;
+  }
+  if (params.get("cmd") === "del") {
+    const id = getNumber(params, "id");
+    if (id === undefined) return null;
+    return `DELETE FROM bills WHERE bills.id = ${id};`;
+  }
+  if (params.get("cmd") === "upd") {
+    const id = getNumber(params, "id");
+    console.log("UPD", id);
+    if (id === undefined) return null;
+    const title = params.get("title");
+    const paid_by = getNumber(params, "paid_by");
+    if (!title && paid_by === undefined) return null;
+
+    const columns: string[] = [];
+    if (title) columns.push(`title="${title}"`);
+    if (paid_by !== undefined) columns.push(`paid_by=${paid_by}`);
+
+    return `UPDATE bills SET ${columns.join(",")} WHERE bills.id = ${id};`;
+  }
+
   return "SELECT * FROM bills";
 }
 

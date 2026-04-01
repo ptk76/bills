@@ -6,7 +6,7 @@ import { AppProvider } from "./context/AppContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AppProvider>
+    <AppProvider token="test">
       <App />
     </AppProvider>
   </StrictMode>,
