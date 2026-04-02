@@ -24,7 +24,6 @@ export interface Item {
   price: number;
   quantity: number;
   bill_id: number;
-  split_id: number;
 }
 
 export interface Bill {
@@ -56,7 +55,7 @@ interface AppContextType {
   deleteFriend: (id: number) => void;
 
   items: Item[];
-  addItem: (item: Omit<Item, "id" | "split_id">) => void;
+  addItem: (item: Omit<Item, "id">) => void;
   updateItem: (id: number, updates: Partial<Omit<Item, "id">>) => void;
   deleteItem: (id: number) => void;
   toggleNameInItem: (itemId: number, name: number) => void;
@@ -65,7 +64,7 @@ interface AppContextType {
   setTitle: (title: string) => void;
   updatePaidBy: (friendId: number | null) => void;
   moneyReturns: MoneyReturn[];
-  addMoneyReturn: (moneyReturn: Omit<MoneyReturn, "id" | "createdAt">) => void;
+  addMoneyReturn: (moneyReturn: Omit<MoneyReturn, "id">) => void;
   deleteMoneyReturn: (id: number) => void;
 }
 
@@ -217,64 +216,87 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     setQueryInProgress(false);
   };
 
-  const addItem = (item: Omit<Item, "id" | "split_id">) => {
-    // TODO
-    // const newItem: Item = {
-    //   ...item,
-    //   id: Date.now().toString(),
-    // };
-    // // If no bill exists or no bill is selected, create a default bill
-    // if (!currentBillId || bills.length === 0) {
-    //   const newBill: Bill = {
-    //     id: Date.now().toString(),
-    //     title: "My Bill",
-    //     paidBy: "",
-    //     items: [newItem],
-    //     createdAt: Date.now(),
-    //   };
-    //   setBills([...bills, newBill]);
-    //   setCurrentBillId(newBill.id);
-    //   return;
-    // }
-    // setBills(
-    //   bills.map((bill) =>
-    //     bill.id === currentBillId
-    //       ? { ...bill, items: [...bill.items, newItem] }
-    //       : bill,
-    //   ),
-    // );
+  type Tables = "friends" | "items" | "bills" | "splits" | "returns";
+
+  type QueryParams = {
+    id?: number;
+    cmd?: "add" | "del" | "upd";
+    title?: string;
+    price?: number;
+    quantity?: number;
+    bill_id?: number;
   };
 
-  const updateItem = (
+  const createQueryUrl = (table: Tables, parameters: QueryParams) => {
+    const params = [];
+    for (const [key, value] of Object.entries(parameters)) {
+      if (value !== undefined) params.push(`${key}=${value}`);
+    }
+    return `/${table}?${params.join("&")}`;
+  };
+
+  const refreshItems = async () => {
+    if (!currentBillId) return;
+    setItems(
+      (await queryDatabase(
+        createQueryUrl("items", {
+          bill_id: currentBillId,
+        }),
+      )) as Item[],
+    );
+  };
+
+  const addItem = async (item: Omit<Item, "id">) => {
+    setQueryInProgress(true);
+
+    await queryDatabase(
+      createQueryUrl("items", {
+        cmd: "add",
+        title: item.title,
+        price: item.price,
+        quantity: item.quantity,
+        bill_id: item.bill_id,
+      }),
+    );
+    await refreshItems();
+
+    setQueryInProgress(false);
+  };
+
+  const updateItem = async (
     id: number,
-    updates: Partial<Omit<Item, "id" | "split_id">>,
+    updates: Partial<Omit<Item, "id" | "bill_id">>,
   ) => {
-    // TODO
-    // if (!currentBillId) return;
-    // setBills(
-    //   bills.map((bill) =>
-    //     bill.id === currentBillId
-    //       ? {
-    //           ...bill,
-    //           items: bill.items.map((item) =>
-    //             item.id === id ? { ...item, ...updates } : item,
-    //           ),
-    //         }
-    //       : bill,
-    //   ),
-    // );
+    setQueryInProgress(true);
+
+    //    title: updates.title,
+    // price: updates.price,
+    // quantity: updates.quantity,
+
+    await queryDatabase(
+      createQueryUrl("items", {
+        cmd: "upd",
+        id: id,
+        ...updates,
+      }),
+    );
+    await refreshItems();
+
+    setQueryInProgress(false);
   };
 
-  const deleteItem = (id: number) => {
-    // TODO
-    // if (!currentBillId) return;
-    // setBills(
-    //   bills.map((bill) =>
-    //     bill.id === currentBillId
-    //       ? { ...bill, items: bill.items.filter((item) => item.id !== id) }
-    //       : bill,
-    //   ),
-    // );
+  const deleteItem = async (id: number) => {
+    setQueryInProgress(true);
+
+    await queryDatabase(
+      createQueryUrl("items", {
+        cmd: "del",
+        id: id,
+      }),
+    );
+    await refreshItems();
+
+    setQueryInProgress(false);
   };
 
   const toggleNameInItem = (itemId: number, friendId: number) => {

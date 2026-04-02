@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS items (
     price INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
     bill_id INTEGER NOT NULL,
-    split_id INTEGER,
     FOREIGN KEY(bill_id) REFERENCES bills(id) ON DELETE CASCADE
 );
 

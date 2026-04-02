@@ -57,11 +57,44 @@ function returns(params: URLSearchParams) {
 }
 
 function items(params: URLSearchParams) {
-  if (params.has("bill_id")) {
-    const id = parseInt(params.get("bill_id")!);
-    if (!isNaN(id)) return `SELECT * FROM items WHERE items.bill_id=${id}`;
+  if (params.get("cmd") === "add") {
+    const title = params.get("title");
+    const price = getNumber(params, "price");
+    const quantity = getNumber(params, "quantity");
+    const bill_id = getNumber(params, "bill_id");
+    if (
+      title === undefined ||
+      price === undefined ||
+      quantity == undefined ||
+      bill_id == undefined
+    )
+      return null;
+    return `INSERT INTO items (title, price, quantity, bill_id) VALUES ("${title}", ${price}, ${quantity}, ${bill_id})`;
   }
-  return null;
+  if (params.get("cmd") === "del") {
+    const id = getNumber(params, "id");
+    if (id === undefined) return null;
+    return `DELETE FROM items WHERE items.id = ${id};`;
+  }
+  if (params.get("cmd") === "upd") {
+    const id = getNumber(params, "id");
+    if (id === undefined) return null;
+
+    const title = params.get("title");
+    const price = getNumber(params, "price");
+    const quantity = getNumber(params, "quantity");
+
+    const columns: string[] = [];
+    if (title) columns.push(`title="${title}"`);
+    if (price !== undefined) columns.push(`price=${price}`);
+    if (quantity !== undefined) columns.push(`quantity=${quantity}`);
+
+    return `UPDATE items SET ${columns.join(",")} WHERE items.id = ${id};`;
+  }
+
+  const bill_id = getNumber(params, "bill_id");
+  if (bill_id === undefined) return null;
+  return `SELECT * FROM items WHERE items.bill_id=${bill_id}`;
 }
 
 function prepareSqlQuery(urlStr: string) {
