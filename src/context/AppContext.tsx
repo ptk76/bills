@@ -12,7 +12,6 @@ export interface Friend {
 }
 
 export interface Split {
-  id: number;
   item_id: number;
   friend_id: number;
   quantity: number;
@@ -58,7 +57,10 @@ interface AppContextType {
   addItem: (item: Omit<Item, "id">) => void;
   updateItem: (id: number, updates: Partial<Omit<Item, "id">>) => void;
   deleteItem: (id: number) => void;
+
+  splits: Split[];
   toggleNameInItem: (itemId: number, name: number) => void;
+
   title: string;
   paidBy: number | null;
   setTitle: (title: string) => void;
@@ -69,21 +71,6 @@ interface AppContextType {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
-// const STORAGE_KEYS = {
-//   FRIENDS: "bill-manager-friends",
-//   BILLS: "bill-manager-bills",
-//   CURRENT_BILL_ID: "bill-manager-current-bill-id",
-//   MONEY_RETURNS: "bill-manager-money-returns",
-// };
-
-// const saveToLocalStorage = (key: string, value: any): void => {
-//   try {
-//     localStorage.setItem(key, JSON.stringify(value));
-//   } catch (error) {
-//     console.error(`Error saving ${key} to localStorage:`, error);
-//   }
-// };
 
 const queryDatabase = async (api: string): Promise<unknown[]> => {
   try {
@@ -100,6 +87,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   const [queryInProgress, setQueryInProgress] = useState<boolean>(true);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
+  const [splits, setSplits] = useState<Split[]>([]);
   const [currentBillId, setCurrentBillId] = useState<number | null>(null);
   const [items, setItems] = useState<Item[]>([]);
 
@@ -115,6 +103,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     const i = (await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[];
     console.log("init ITEMS", i);
     setItems((await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[]);
+    setSplits((await queryDatabase("/splits")) as Split[]);
     setQueryInProgress(false);
   };
 
@@ -155,8 +144,6 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   }, [moneyReturns]);
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
-  // const names = friends || [];
-  // const items = currentBill?.items || [];
   const title = currentBill?.title || "Items & Billing";
   const paidBy = currentBill?.paidBy || null;
 
@@ -225,9 +212,12 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     price?: number;
     quantity?: number;
     bill_id?: number;
+    item_id?: number;
+    friend_id?: number;
   };
 
-  const createQueryUrl = (table: Tables, parameters: QueryParams) => {
+  const createQueryUrl = (table: Tables, parameters?: QueryParams) => {
+    if (!parameters) return `/${table}`;
     const params = [];
     for (const [key, value] of Object.entries(parameters)) {
       if (value !== undefined) params.push(`${key}=${value}`);
@@ -252,10 +242,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     await queryDatabase(
       createQueryUrl("items", {
         cmd: "add",
-        title: item.title,
-        price: item.price,
-        quantity: item.quantity,
-        bill_id: item.bill_id,
+        ...item,
       }),
     );
     await refreshItems();
@@ -268,10 +255,6 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     updates: Partial<Omit<Item, "id" | "bill_id">>,
   ) => {
     setQueryInProgress(true);
-
-    //    title: updates.title,
-    // price: updates.price,
-    // quantity: updates.quantity,
 
     await queryDatabase(
       createQueryUrl("items", {
@@ -299,73 +282,33 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     setQueryInProgress(false);
   };
 
-  const toggleNameInItem = (itemId: number, friendId: number) => {
-    // TODO
-    // if (!currentBillId) return;
-    // setBills(
-    //   bills.map((bill) =>
-    //     bill.id === currentBillId
-    //       ? {
-    //           ...bill,
-    //           items: bill.items.map((item) => {
-    //             if (item.id === itemId) {
-    //               if (
-    //                 !item.checkedNames.find(
-    //                   (split) => split.friendId === friendId,
-    //                 )
-    //               ) {
-    //                 item.checkedNames.push({ friendId: friendId, quantity: 0 });
-    //               }
-    //             }
-    //             return item.id === itemId
-    //               ? {
-    //                   ...item,
-    //                   checkedNames: item.checkedNames.map((split) =>
-    //                     split.friendId === friendId
-    //                       ? {
-    //                           ...split,
-    //                           quantity:
-    //                             (split.quantity + 1) % (item.quantity + 1),
-    //                         }
-    //                       : split,
-    //                   ),
-    //                 }
-    //               : item;
-    //           }),
-    //         }
-    //       : bill,
-    //   ),
-    // );
+  const refreshSplits = async () => {
+    setSplits((await queryDatabase(createQueryUrl("splits"))) as Split[]);
   };
 
-  // const toggleNameInItem = (itemId: string, friendId: string) => {
-  //   if (!currentBillId) return;
-  //   console.log("TOGGLE", itemId, friendId);
-  //   setBills(
-  //     bills.map((bill) =>
-  //       bill.id === currentBillId
-  //         ? {
-  //             ...bill,
-  //             items: bill.items.map((item) =>
-  //               item.id === itemId
-  //                 ? {
-  //                     ...item,
-  //                     checkedNames: item.checkedNames.map((split) =>
-  //                       split.friendId === friendId
-  //                         ? {
-  //                             ...split,
-  //                             quantity: (split.quantity + 1) % item.quantity,
-  //                           }
-  //                         : split,
-  //                     ),
-  //                   }
-  //                 : item,
-  //             ),
-  //           }
-  //         : bill,
-  //     ),
-  //   );
-  // };
+  const toggleNameInItem = async (itemId: number, friendId: number) => {
+    const item = items.find((item) => item.id === itemId);
+    if (!item) return;
+
+    const split = splits.find(
+      (split) => split.friend_id === friendId && split.item_id === itemId,
+    );
+    console.log("SPLIT", split);
+    const quantity = split ? (split.quantity + 1) % (item.quantity + 1) : 1;
+
+    setQueryInProgress(true);
+
+    await queryDatabase(
+      createQueryUrl("splits", {
+        item_id: itemId,
+        friend_id: friendId,
+        quantity: quantity,
+      }),
+    );
+    await refreshSplits();
+
+    setQueryInProgress(false);
+  };
 
   const updatePaidBy = async (friendId: number | null) => {
     setQueryInProgress(true);
@@ -411,6 +354,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
         addItem,
         updateItem,
         deleteItem,
+        splits,
         toggleNameInItem,
         title,
         paidBy,

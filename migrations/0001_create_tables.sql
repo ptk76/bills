@@ -28,10 +28,10 @@ CREATE TABLE IF NOT EXISTS items (
 
 -- Splits
 CREATE TABLE IF NOT EXISTS splits (
-    id INTEGER PRIMARY KEY NOT NULL,
     item_id INTEGER NOT NULL,
     friend_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
+    PRIMARY KEY (item_id, friend_id),
     FOREIGN KEY(item_id) REFERENCES items(id) ON DELETE CASCADE,
     FOREIGN KEY(friend_id) REFERENCES friends(id) ON DELETE CASCADE
 );

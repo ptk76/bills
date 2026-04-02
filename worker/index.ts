@@ -97,12 +97,33 @@ function items(params: URLSearchParams) {
   return `SELECT * FROM items WHERE items.bill_id=${bill_id}`;
 }
 
+function splits(params: URLSearchParams) {
+  if (params.size === 0) return `SELECT * FROM splits`;
+  const item_id = getNumber(params, "item_id");
+  const friend_id = getNumber(params, "friend_id");
+  const quantity = getNumber(params, "quantity");
+  if (item_id === undefined || friend_id == undefined || quantity === undefined)
+    return null;
+
+  console.log("SPLIT", params);
+  if (quantity === 0)
+    return `DELETE FROM splits WHERE splits.item_id=${item_id} AND splits.friend_id=${friend_id}`;
+
+  return `
+  INSERT INTO splits (item_id, friend_id, quantity)
+  VALUES (${item_id}, ${friend_id}, ${quantity})
+  ON CONFLICT (item_id, friend_id) DO UPDATE
+  SET quantity = ${quantity};
+  `;
+}
+
 function prepareSqlQuery(urlStr: string) {
   const url = new URL(urlStr);
   if (url.pathname.startsWith("/friends")) return friends(url.searchParams);
   if (url.pathname.startsWith("/bills")) return bills(url.searchParams);
   if (url.pathname.startsWith("/returns")) return returns(url.searchParams);
   if (url.pathname.startsWith("/items")) return items(url.searchParams);
+  if (url.pathname.startsWith("/splits")) return splits(url.searchParams);
   return null;
 }
 
