@@ -33,7 +33,7 @@ export interface Bill {
 
 export interface MoneyReturn {
   id: number;
-  from_friend_it: number;
+  from_friend_id: number;
   to_friend_id: number;
   title: string;
   amount: number;
@@ -319,21 +319,22 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     setQueryInProgress(false);
   };
 
-  const addMoneyReturn = (
+  const addMoneyReturn = async (
     moneyReturn: Omit<MoneyReturn, "id" | "createdAt">,
   ) => {
-    // TODO
-    // const newMoneyReturn: MoneyReturn = {
-    //   ...moneyReturn,
-    //   id: Date.now().toString(),
-    //   createdAt: Date.now(),
-    // };
-    // setMoneyReturns([...moneyReturns, newMoneyReturn]);
+    setQueryInProgress(true);
+    await queryDatabase(
+      `/returns?cmd=add&from_friend_id=${moneyReturn.from_friend_id}&to_friend_id=${moneyReturn.to_friend_id}&amount=${moneyReturn.amount}&title=${moneyReturn.title}`,
+    );
+    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    setQueryInProgress(false);
   };
 
-  const deleteMoneyReturn = (id: number) => {
-    // TODO
-    // setMoneyReturns(moneyReturns.filter((mr) => mr.id !== id));
+  const deleteMoneyReturn = async (id: number) => {
+    setQueryInProgress(true);
+    await queryDatabase(`/returns?cmd=del&id=${id}`);
+    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    setQueryInProgress(false);
   };
 
   return (

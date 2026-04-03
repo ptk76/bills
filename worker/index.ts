@@ -53,7 +53,42 @@ function bills(params: URLSearchParams) {
 }
 
 function returns(params: URLSearchParams) {
-  return "SELECT * FROM returns";
+  if (params.size === 0) return "SELECT * FROM returns";
+
+  if (params.get("cmd") === "add") {
+    const from_friend_id = getNumber(params, "from_friend_id");
+    const to_friend_id = getNumber(params, "to_friend_id");
+    if (!from_friend_id || !to_friend_id) return null;
+
+    const amount = getNumber(params, "amount");
+    if (amount === undefined || amount === 0) return null;
+    const title = params.get("title") ?? null;
+    return `INSERT INTO returns (from_friend_id, to_friend_id, title, amount) VALUES (${from_friend_id}, ${to_friend_id}, "${title}", ${amount})`;
+  }
+
+  const id = getNumber(params, "id");
+  if (id === undefined) return null;
+
+  if (params.get("cmd") === "del") {
+    return `DELETE FROM returns WHERE returns.id = ${id};`;
+  }
+  if (params.get("cmd") === "upd") {
+    const from_friend_id = getNumber(params, "from_friend_id");
+    const to_friend_id = getNumber(params, "friend_id");
+    const title = params.get("title");
+    const amount = getNumber(params, "amount");
+
+    const columns: string[] = [];
+    if (from_friend_id !== undefined)
+      columns.push(`from_friend_id="${from_friend_id}"`);
+    if (to_friend_id !== undefined)
+      columns.push(`to_friend_id=${to_friend_id}`);
+    if (title !== undefined) columns.push(`title=${title}`);
+    if (amount !== undefined) columns.push(`amount=${amount}`);
+
+    return `UPDATE returns SET ${columns.join(",")} WHERE returns.id = ${id};`;
+  }
+  return null;
 }
 
 function items(params: URLSearchParams) {
