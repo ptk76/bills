@@ -50,147 +50,149 @@ function MoneyReturns(): React.JSX.Element {
 
   return (
     <div className="money-returns-container">
-      <h2>Money Returns</h2>
+      <div className="money-returns-section">
+        <h2>Money Returns</h2>
 
-      {friends.length < 2 ? (
-        <p className="warning-message">
-          You need at least 2 friends to record money returns. Please add
-          friends on the Friends page.
-        </p>
-      ) : (
-        <>
-          <div className="add-return-form">
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="from-friend">From:</label>
-                <select
-                  id="from-friend"
-                  value={fromFriendId ?? undefined}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    setFromFriendId(isNaN(val) ? null : val);
-                  }}
-                  className="friend-select"
-                >
-                  <option value="">Select person</option>
-                  {friends.map((friend) => (
-                    <option key={friend.id} value={friend.id}>
-                      {friend.nick}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="to-friend">To:</label>
-                <select
-                  id="to-friend"
-                  value={toFriendId ?? undefined}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    setToFriendId(isNaN(val) ? null : val);
-                  }}
-                  className="friend-select"
-                >
-                  <option value="">Select person</option>
-                  {friends.map((friend) => (
-                    <option key={friend.id} value={friend.id}>
-                      {friend.nick}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="amount">Amount (€):</label>
-                <input
-                  id="amount"
-                  type="number"
-                  value={amount ?? undefined}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    setAmount(isNaN(val) ? 0 : val);
-                  }}
-                  onKeyPress={handleKeyPress}
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  className="amount-input"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group full-width">
-                <label htmlFor="description">Description (optional):</label>
-                <input
-                  id="description"
-                  type="text"
-                  value={title ?? undefined}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="e.g., Payment for dinner, Rent share"
-                  className="description-input"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={handleAddReturn}
-              className="add-return-button"
-              disabled={
-                !fromFriendId ||
-                !toFriendId ||
-                !amount ||
-                fromFriendId === toFriendId
-              }
-            >
-              Record Return
-            </button>
-          </div>
-
-          {moneyReturns.length > 0 ? (
-            <div className="returns-list">
-              <h3>Return History</h3>
-              {moneyReturns.map((moneyReturn) => (
-                <div key={moneyReturn.id} className="return-card">
-                  <div className="return-header">
-                    <div className="return-people">
-                      <span className="from-person">
-                        {getFriendName(moneyReturn.from_friend_id)}
-                      </span>
-                      <span className="arrow">→</span>
-                      <span className="to-person">
-                        {getFriendName(moneyReturn.to_friend_id)}
-                      </span>
-                    </div>
-                    <div className="return-amount">
-                      {moneyReturn.amount.toFixed(2)} €
-                    </div>
-                  </div>
-                  {moneyReturn.title && (
-                    <div className="return-description">
-                      {moneyReturn.title}
-                    </div>
-                  )}
-                  <div className="return-footer">
-                    <button
-                      onClick={() => handleDelete(moneyReturn.id)}
-                      className="delete-return-button"
-                    >
-                      Delete
-                    </button>
-                  </div>
+        {friends.length < 2 ? (
+          <p className="warning-message">
+            You need at least 2 friends to record money returns. Please add
+            friends on the Friends page.
+          </p>
+        ) : (
+          <>
+            <div className="add-return-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="from-friend">From:</label>
+                  <select
+                    id="from-friend"
+                    value={fromFriendId ?? undefined}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setFromFriendId(isNaN(val) ? null : val);
+                    }}
+                    className="friend-select"
+                  >
+                    <option value="">Select person</option>
+                    {friends.map((friend) => (
+                      <option key={friend.id} value={friend.id}>
+                        {friend.nick}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              ))}
+
+                <div className="form-group">
+                  <label htmlFor="to-friend">To:</label>
+                  <select
+                    id="to-friend"
+                    value={toFriendId ?? undefined}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setToFriendId(isNaN(val) ? null : val);
+                    }}
+                    className="friend-select"
+                  >
+                    <option value="">Select person</option>
+                    {friends.map((friend) => (
+                      <option key={friend.id} value={friend.id}>
+                        {friend.nick}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="amount">Amount (€):</label>
+                  <input
+                    id="amount"
+                    type="number"
+                    value={amount ?? undefined}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setAmount(isNaN(val) ? 0 : val);
+                    }}
+                    onKeyPress={handleKeyPress}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    className="amount-input"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group full-width">
+                  <label htmlFor="description">Description (optional):</label>
+                  <input
+                    id="description"
+                    type="text"
+                    value={title ?? undefined}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="e.g., Payment for dinner, Rent share"
+                    className="description-input"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleAddReturn}
+                className="add-return-button"
+                disabled={
+                  !fromFriendId ||
+                  !toFriendId ||
+                  !amount ||
+                  fromFriendId === toFriendId
+                }
+              >
+                Record Return
+              </button>
             </div>
-          ) : (
-            <div className="empty-state">
-              <p>No money returns recorded yet. Add one above!</p>
-            </div>
-          )}
-        </>
-      )}
+
+            {moneyReturns.length > 0 ? (
+              <div className="returns-list">
+                <h3>Return History</h3>
+                {moneyReturns.map((moneyReturn) => (
+                  <div key={moneyReturn.id} className="return-card">
+                    <div className="return-header">
+                      <div className="return-people">
+                        <span className="from-person">
+                          {getFriendName(moneyReturn.from_friend_id)}
+                        </span>
+                        <span className="arrow">→</span>
+                        <span className="to-person">
+                          {getFriendName(moneyReturn.to_friend_id)}
+                        </span>
+                      </div>
+                      <div className="return-amount">
+                        {moneyReturn.amount.toFixed(2)} €
+                      </div>
+                    </div>
+                    {moneyReturn.title && (
+                      <div className="return-description">
+                        {moneyReturn.title}
+                      </div>
+                    )}
+                    <div className="return-footer">
+                      <button
+                        onClick={() => handleDelete(moneyReturn.id)}
+                        className="delete-return-button"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <p>No money returns recorded yet. Add one above!</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

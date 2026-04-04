@@ -21,8 +21,8 @@ function App(): React.JSX.Element {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/statistics" element={<Statistics />} />
             <Route path="/money-returns" element={<MoneyReturns />} />
+            <Route path="/statistics" element={<Statistics />} />
           </Routes>
         </div>
       </div>
