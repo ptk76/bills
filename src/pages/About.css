@@ -462,7 +462,7 @@
 }
 
 .checkbox-quantity {
-  margin: 0 5px;
+  margin-left: 5px;
   font-weight: bold;
   color: #555;
 }

@@ -413,6 +413,7 @@ function About(): React.JSX.Element {
                                 >
                                   <div className="checkbox-name">
                                     <div>{friend.nick}</div>
+                                    {splitByFriend !== 0 && <>:</>}
                                     <div
                                       className={
                                         splitByFriend === 0
@@ -420,7 +421,6 @@ function About(): React.JSX.Element {
                                           : "checkbox-quantity"
                                       }
                                     >
-                                      [
                                       {
                                         splits.find(
                                           (split) =>
@@ -428,7 +428,7 @@ function About(): React.JSX.Element {
                                             split.item_id === item.id,
                                         )?.quantity
                                       }
-                                      ]
+                                      &rarr;
                                     </div>
                                     <div
                                       className={
