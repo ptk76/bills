@@ -6,6 +6,7 @@ function About(): React.JSX.Element {
   const {
     currentBillId,
     friends,
+    splits,
     items,
     addItem,
     updateItem,
@@ -91,27 +92,34 @@ function About(): React.JSX.Element {
   };
 
   const calculatePersonTotal = (friendId: number): number => {
-    // const personSplits = items.reduce((prev, item) => {
-    //   const allSplit = item.checkedNames.reduce(
-    //     (prev, split) => prev + split.quantity,
-    //     0,
-    //   );
-    //   const friendSplit = item.checkedNames.reduce(
-    //     (prev, split) =>
-    //       split.friendId === friendId ? prev + split.quantity : prev,
-    //     0,
-    //   );
-    //   if (allSplit === 0) return prev;
-    //   return prev + (item.price * item.quantity * friendSplit) / allSplit;
-    // }, 0);
+    return items.reduce((total, item) => {
+      if (item.bill_id !== currentBillId) return total;
+      const allSplitQuantity = splits.reduce(
+        (total, split) =>
+          total + (split.item_id === item.id ? split.quantity : 0),
+        0,
+      );
+      if (allSplitQuantity === 0) return total;
 
-    // return personSplits;
-    // TODO
-    return 0;
+      const friendSplit = splits.find(
+        (split) => split.friend_id === friendId && split.item_id === item.id,
+      );
+      if (!friendSplit) return total;
+
+      return (
+        total +
+        (item.price * item.quantity * friendSplit.quantity) / allSplitQuantity
+      );
+    }, 0);
   };
 
   const calculateTotalPrice = (): number => {
-    return items.reduce((total, item) => total + item.price * item.quantity, 0);
+    return items.reduce(
+      (total, item) =>
+        total +
+        (item.bill_id === currentBillId ? item.price * item.quantity : 0),
+      0,
+    );
   };
 
   const startEditingTitle = () => {
@@ -139,21 +147,31 @@ function About(): React.JSX.Element {
     }
   };
 
-  const calculateItemSplitByFriend = (item: Item, friendId: number) => {
-    // const totalParts = item.checkedNames.reduce(
-    //   (sum, split) => sum + split.quantity,
-    //   0,
-    // );
-    // const friendSplit = item.checkedNames.find(
-    //   (split) => split.friendId === friendId,
-    // );
-    // const friendParts = friendSplit?.quantity ?? 0;
+  const countItems = () => {
+    return items.reduce(
+      (total, item) => total + (item.bill_id === currentBillId ? 1 : 0),
+      0,
+    );
+  };
 
-    // return friendParts !== 0
-    //   ? ((item.price * item.quantity) / totalParts) * friendParts
-    //   : 0;
-    // TODO
-    return 0;
+  const calculateItemSplitByFriend = (item: Item, friendId: number) => {
+    if (item.bill_id !== currentBillId) return 0;
+    const allSplitQuantity = splits.reduce(
+      (total, split) =>
+        total + (split.item_id === item.id ? split.quantity : 0),
+      0,
+    );
+
+    if (allSplitQuantity === 0) return 0;
+
+    const friendSplit = splits.find(
+      (split) => split.friend_id === friendId && split.item_id === item.id,
+    );
+    if (!friendSplit) return 0;
+
+    return (
+      (item.price * item.quantity * friendSplit.quantity) / allSplitQuantity
+    );
   };
 
   return (
@@ -189,7 +207,7 @@ function About(): React.JSX.Element {
           )}
         </div>
 
-        {items.length > 0 && (
+        {countItems() > 0 && (
           <div className="total-price-section">
             <div className="total-price-content">
               <span className="total-price-label">Total Price:</span>
@@ -202,27 +220,40 @@ function About(): React.JSX.Element {
 
         {friends.length > 0 && (
           <div className="names-summary-section">
+            <h3>Paid by:</h3>
+            <div className="names-summary-list">
+              <div className="form-group">
+                <select
+                  id="from-friend"
+                  value={paidBy ?? undefined}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    updatePaidBy(isNaN(val) ? null : val);
+                  }}
+                  className="friend-select"
+                >
+                  <option value="null">None</option>
+                  {friends.map((friend) => (
+                    <option key={friend.id} value={friend.id}>
+                      {friend.nick}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {friends.length > 0 && (
+          <div className="names-summary-section">
             <h3>People & Totals</h3>
             <div className="names-summary-list">
               {friends.map((friend) => {
                 const total = calculatePersonTotal(friend.id);
+                if (total === 0) return null;
                 return (
-                  <div
-                    key={friend.id}
-                    className={`person-summary-item ${paidBy === friend.id ? "selected" : ""}`}
-                    onClick={() => {
-                      updatePaidBy(friend.id ? friend.id : null);
-                    }}
-                  >
-                    <div className="person-info">
-                      <input
-                        type="radio"
-                        checked={paidBy === friend.id}
-                        onChange={() => updatePaidBy(friend.id)}
-                        className="person-radio"
-                      />
-                      <span className="person-name">{friend.nick}</span>
-                    </div>
+                  <div key={friend.id} className={`person-summary-item`}>
+                    <span className="person-name">{friend.nick}</span>
                     <span className="person-total">{total.toFixed(2)} €</span>
                   </div>
                 );
@@ -273,145 +304,152 @@ function About(): React.JSX.Element {
           </p>
         )}
 
-        {items.length > 0 ? (
+        {countItems() > 0 ? (
           <div className="items-list">
-            {items.map((item) => (
-              <div key={item.id} className="item-card">
-                {editingItemId === item.id ? (
-                  // Edit mode
-                  <div className="edit-mode">
-                    <div className="edit-header">
-                      <h3>Edit Item</h3>
-                    </div>
-                    <div className="edit-form">
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        onKeyPress={handleEditKeyPress}
-                        placeholder="Item name"
-                        className="edit-name-input"
-                        autoFocus
-                      />
-                      <input
-                        type="number"
-                        value={editPrice}
-                        onChange={(e) => setEditPrice(e.target.value)}
-                        onKeyPress={handleEditKeyPress}
-                        placeholder="Price"
-                        min="0"
-                        step="0.01"
-                        className="edit-price-input"
-                      />
-                      <input
-                        type="number"
-                        value={editQuantity}
-                        onChange={(e) => setEditQuantity(e.target.value)}
-                        onKeyPress={handleEditKeyPress}
-                        placeholder="Quantity"
-                        min="1"
-                        max="100"
-                        step="1"
-                        className="edit-price-input"
-                      />
-                    </div>
-                    <div className="edit-actions">
-                      <button onClick={saveEdit} className="save-button">
-                        Save
-                      </button>
-                      <button onClick={cancelEditing} className="cancel-button">
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  // View mode
-                  <>
-                    <div className="item-header">
-                      <div className="item-info">
-                        <h3>{item.title}</h3>
+            {items
+              .filter((item) => item.bill_id === currentBillId)
+              .map((item) => (
+                <div key={item.id} className="item-card">
+                  {editingItemId === item.id ? (
+                    // Edit mode
+                    <div className="edit-mode">
+                      <div className="edit-header">
+                        <h3>Edit Item</h3>
                       </div>
-                      <div className="item-actions">
-                        <button
-                          onClick={() => startEditing(item.id)}
-                          className="edit-button"
-                        >
-                          Edit
+                      <div className="edit-form">
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onKeyPress={handleEditKeyPress}
+                          placeholder="Item name"
+                          className="edit-name-input"
+                          autoFocus
+                        />
+                        <input
+                          type="number"
+                          value={editPrice}
+                          onChange={(e) => setEditPrice(e.target.value)}
+                          onKeyPress={handleEditKeyPress}
+                          placeholder="Price"
+                          min="0"
+                          step="0.01"
+                          className="edit-price-input"
+                        />
+                        <input
+                          type="number"
+                          value={editQuantity}
+                          onChange={(e) => setEditQuantity(e.target.value)}
+                          onKeyPress={handleEditKeyPress}
+                          placeholder="Quantity"
+                          min="1"
+                          max="100"
+                          step="1"
+                          className="edit-price-input"
+                        />
+                      </div>
+                      <div className="edit-actions">
+                        <button onClick={saveEdit} className="save-button">
+                          Save
                         </button>
                         <button
-                          onClick={() => deleteItem(item.id)}
-                          className="delete-item-button"
+                          onClick={cancelEditing}
+                          className="cancel-button"
                         >
-                          Delete
+                          Cancel
                         </button>
                       </div>
                     </div>
-                    <div className="item-price-container">
-                      <p className="item-price">{item.price.toFixed(2)} € </p>
-                      <p className="item-quantity">x {item.quantity}</p>
-                      <p className="item-price-total">
-                        {(item.price * item.quantity).toFixed(2)} €
-                      </p>
-                    </div>
-
-                    {friends.length > 0 && (
-                      <div className="names-checkboxes">
-                        <h4>Split with:</h4>
-                        <div className="checkbox-list">
-                          {friends.map((friend) => (
-                            <label
-                              key={friend.id}
-                              className="checkbox-label"
-                              onClick={() =>
-                                toggleNameInItem(item.id, friend.id)
-                              }
-                            >
-                              <div className="checkbox-name">
-                                <div>{friend.nick}</div>
-                                <span
-                                  className={
-                                    calculateItemSplitByFriend(
-                                      item,
-                                      friend.id,
-                                    ) === 0
-                                      ? "checkbox-quantity checkbox-hide"
-                                      : "checkbox-quantity"
-                                  }
-                                >
-                                  TODO
-                                  {/* {
-                                    item.checkedNames.find(
-                                      (split) => split.friendId === friend.id,
-                                    )?.quantity
-                                  } */}
-                                </span>
-                                <span
-                                  className={
-                                    calculateItemSplitByFriend(
-                                      item,
-                                      friend.id,
-                                    ) === 0
-                                      ? "checkbox-split checkbox-hide"
-                                      : "checkbox-split"
-                                  }
-                                >
-                                  [
-                                  {calculateItemSplitByFriend(
-                                    item,
-                                    friend.id,
-                                  ).toFixed(2)}{" "}
-                                  €]
-                                </span>
-                              </div>
-                            </label>
-                          ))}
+                  ) : (
+                    // View mode
+                    <>
+                      <div className="item-header">
+                        <div className="item-info">
+                          <h3>{item.title}</h3>
+                        </div>
+                        <div className="item-actions">
+                          <button
+                            onClick={() => startEditing(item.id)}
+                            className="edit-button"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteItem(item.id)}
+                            className="delete-item-button"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
+                      <div className="item-price-container">
+                        <p className="item-price">{item.price.toFixed(2)} € </p>
+                        <p className="item-quantity">x {item.quantity}</p>
+                        <p className="item-price-total">
+                          {(item.price * item.quantity).toFixed(2)} €
+                        </p>
+                      </div>
+
+                      {friends.length > 0 && (
+                        <div className="names-checkboxes">
+                          <h4>Split with:</h4>
+                          <div className="checkbox-list">
+                            {friends.map((friend) => {
+                              const splitByFriend = calculateItemSplitByFriend(
+                                item,
+                                friend.id,
+                              );
+                              return (
+                                <label
+                                  key={friend.id}
+                                  className={
+                                    splitByFriend === 0
+                                      ? "checkbox-label no-split"
+                                      : "checkbox-label"
+                                  }
+                                  onClick={() =>
+                                    toggleNameInItem(item.id, friend.id)
+                                  }
+                                >
+                                  <div className="checkbox-name">
+                                    <div>{friend.nick}</div>
+                                    <div
+                                      className={
+                                        splitByFriend === 0
+                                          ? "checkbox-quantity checkbox-hide"
+                                          : "checkbox-quantity"
+                                      }
+                                    >
+                                      [
+                                      {
+                                        splits.find(
+                                          (split) =>
+                                            split.friend_id === friend.id &&
+                                            split.item_id === item.id,
+                                        )?.quantity
+                                      }
+                                      ]
+                                    </div>
+                                    <div
+                                      className={
+                                        splitByFriend === 0
+                                          ? "checkbox-split checkbox-hide"
+                                          : "checkbox-split"
+                                      }
+                                    >
+                                      {splitByFriend.toFixed(2)}
+                                    </div>
+                                  </div>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
           </div>
         ) : (
           <p className="empty-message">

@@ -125,31 +125,13 @@
 .names-summary-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
 
 .person-summary-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  background-color: #f8f8f8;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s;
-  user-select: none;
-}
-
-.person-summary-item:hover {
-  background-color: #e8e8f8;
-  border-color: #646cff;
-}
-
-.person-summary-item.selected {
-  background-color: #e8e8ff;
-  border-color: #646cff;
-  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.3);
+  padding: 0.2rem 1rem;
 }
 
 .person-info {
@@ -445,11 +427,15 @@
   gap: 0.75rem;
 }
 
+.no-split {
+  opacity: 0.3; 
+}
+
 .checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.2rem 0.5rem;
   background-color: #f8f8f8;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -472,18 +458,16 @@
 .checkbox-name {
   font-size: 0.95rem;
   color: #333;
+  display: flex;
 }
 
 .checkbox-quantity {
   margin: 0 5px;
-  font-size: 0.8rem;
   font-weight: bold;
   color: #555;
 }
 
 .checkbox-split {
-  margin: 0 5px;
-  font-size: 0.8rem;
   font-weight: bold;
   color: #4caf50;
 }
