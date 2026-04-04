@@ -14,8 +14,10 @@ function App(): React.JSX.Element {
   return (
     <Router>
       <div className="app">
-        {queryInProgress && <div className="loader"></div>}
         <Navigation />
+        <div className="loader-container">
+          {queryInProgress && <div className="loader"></div>}
+        </div>
         <div className="content">
           <Routes>
             <Route path="/" element={<Home />} />

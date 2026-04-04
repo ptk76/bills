@@ -6,10 +6,11 @@
 .navigation ul {
   list-style: none;
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   margin: 0;
   padding: 0;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .navigation li {
