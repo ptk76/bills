@@ -36,7 +36,6 @@ function bills(params: URLSearchParams) {
   }
   if (params.get("cmd") === "upd") {
     const id = getNumber(params, "id");
-    console.log("UPD", id);
     if (id === undefined) return null;
     const title = params.get("title");
     const paid_by = getNumber(params, "paid_by");
@@ -138,7 +137,6 @@ function splits(params: URLSearchParams) {
   if (item_id === undefined || friend_id == undefined || quantity === undefined)
     return null;
 
-  console.log("SPLIT", params);
   if (quantity === 0)
     return `DELETE FROM splits WHERE splits.item_id=${item_id} AND splits.friend_id=${friend_id}`;
 

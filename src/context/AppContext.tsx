@@ -103,18 +103,15 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
     // const i = (await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[];
     const i = (await queryDatabase(`/items`)) as Item[];
-    console.log("init ITEMS", i);
     setItems((await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[]);
     setSplits((await queryDatabase("/splits")) as Split[]);
     setQueryInProgress(false);
   };
 
   const loadItems = async () => {
-    console.log("currentBillId", currentBillId);
     const i = (await queryDatabase(
       `/items?bill_id=${currentBillId}`,
     )) as Item[];
-    console.log("ITEMS", i);
     setItems(
       (await queryDatabase(`/items?bill_id=${currentBillId}`)) as Item[],
     );
@@ -295,7 +292,6 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     const split = splits.find(
       (split) => split.friend_id === friendId && split.item_id === itemId,
     );
-    console.log("SPLIT", split);
     const quantity = split ? (split.quantity + 1) % (item.quantity + 1) : 1;
 
     setQueryInProgress(true);

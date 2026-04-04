@@ -9,40 +9,44 @@ interface Debt {
 }
 
 function Statistics(): React.JSX.Element {
-  const { friends, bills, moneyReturns } = useAppContext();
+  const { friends, bills, items, splits, moneyReturns } = useAppContext();
 
   // Calculate how much each person owes for a specific bill
-  const calculateBillDebts = (billId: string): Debt[] => {
+  const calculateBillDebts = (billId: number): Debt[] => {
     const bill = bills.find((b) => b.id === billId);
-    if (!bill || !bill.paidBy) return [];
+    if (!bill || !bill.paid_by) return [];
 
-    const payer = friends.find((f) => f.id === bill.paidBy);
+    const payer = friends.find((f) => f.id === bill.paid_by);
     if (!payer) return [];
 
     const debts: Debt[] = [];
 
     // Calculate each person's share
     friends.forEach((friend) => {
-      if (friend.id === bill.paidBy) return; // Skip the payer
+      if (friend.id === bill.paid_by) return; // Skip the payer
 
-      const personTotal = bill.items.reduce((total, item) => {
-        const allSplit = item.checkedNames.reduce(
-          (sum, split) => sum + split.quantity,
+      const personTotal = items.reduce((total, item) => {
+        if (item.bill_id !== billId) return total;
+
+        const allSplit = splits.reduce(
+          (sum, split) =>
+            split.item_id === item.id ? sum + split.quantity : sum,
           0,
         );
-        const friendSplit = item.checkedNames.find(
-          (split) => split.friendId === friend.id,
+        if (allSplit === 0) return total;
+
+        const friendSplit = splits.find(
+          (split) => split.friend_id === friend.id && split.item_id === item.id,
         );
         const friendParts = friendSplit?.quantity ?? 0;
 
-        if (allSplit === 0) return total;
         return total + (item.price * item.quantity * friendParts) / allSplit;
       }, 0);
 
       if (personTotal > 0) {
         debts.push({
-          from: friend.name,
-          to: payer.name,
+          from: friend.nick,
+          to: payer.nick,
           amount: personTotal,
         });
       }
@@ -57,54 +61,62 @@ function Statistics(): React.JSX.Element {
     const debtMatrix = new Map<string, Map<string, number>>();
 
     bills.forEach((bill) => {
-      if (!bill.paidBy) return;
+      if (!bill.paid_by) return;
 
-      const payer = friends.find((f) => f.id === bill.paidBy);
+      const payer = friends.find((f) => f.id === bill.paid_by);
       if (!payer) return;
 
       friends.forEach((friend) => {
-        if (friend.id === bill.paidBy) return;
+        if (friend.id === bill.paid_by) return;
 
-        const personTotal = bill.items.reduce((total, item) => {
-          const allSplit = item.checkedNames.reduce(
-            (sum, split) => sum + split.quantity,
+        const personTotal = items.reduce((total, item) => {
+          if (item.bill_id !== bill.id) return total;
+          const allSplit = splits.reduce(
+            (sum, split) =>
+              split.item_id === item.id ? sum + split.quantity : sum,
             0,
           );
-          const friendSplit = item.checkedNames.find(
-            (split) => split.friendId === friend.id,
+          if (allSplit === 0) return total;
+          const friendSplit = splits.find(
+            (split) =>
+              split.friend_id === friend.id && split.item_id === item.id,
           );
           const friendParts = friendSplit?.quantity ?? 0;
 
-          if (allSplit === 0) return total;
           return total + (item.price * item.quantity * friendParts) / allSplit;
         }, 0);
 
         if (personTotal > 0) {
           // friend owes payer
-          if (!debtMatrix.has(friend.name)) {
-            debtMatrix.set(friend.name, new Map());
+          if (!debtMatrix.has(friend.nick)) {
+            debtMatrix.set(friend.nick, new Map());
           }
-          const friendDebts = debtMatrix.get(friend.name)!;
-          friendDebts.set(payer.name, (friendDebts.get(payer.name) || 0) + personTotal);
+          const friendDebts = debtMatrix.get(friend.nick)!;
+          friendDebts.set(
+            payer.nick,
+            (friendDebts.get(payer.nick) || 0) + personTotal,
+          );
         }
       });
     });
 
     // Now process money returns to reduce debts
     moneyReturns.forEach((moneyReturn) => {
-      const fromFriend = friends.find((f) => f.id === moneyReturn.fromFriendId);
-      const toFriend = friends.find((f) => f.id === moneyReturn.toFriendId);
+      const fromFriend = friends.find(
+        (f) => f.id === moneyReturn.from_friend_id,
+      );
+      const toFriend = friends.find((f) => f.id === moneyReturn.to_friend_id);
 
       if (!fromFriend || !toFriend) return;
 
       // Money return means fromFriend paid back toFriend
       // This reduces what fromFriend owes toFriend
-      if (!debtMatrix.has(fromFriend.name)) {
-        debtMatrix.set(fromFriend.name, new Map());
+      if (!debtMatrix.has(fromFriend.nick)) {
+        debtMatrix.set(fromFriend.nick, new Map());
       }
-      const fromDebts = debtMatrix.get(fromFriend.name)!;
-      const currentDebt = fromDebts.get(toFriend.name) || 0;
-      fromDebts.set(toFriend.name, currentDebt - moneyReturn.amount);
+      const fromDebts = debtMatrix.get(fromFriend.nick)!;
+      const currentDebt = fromDebts.get(toFriend.nick) || 0;
+      fromDebts.set(toFriend.nick, currentDebt - moneyReturn.amount);
     });
 
     // Now calculate net debts
@@ -123,7 +135,8 @@ function Statistics(): React.JSX.Element {
         // Calculate net debt
         const netAmount = amount1 - reverseAmount;
 
-        if (Math.abs(netAmount) > 0.01) { // Use small threshold to avoid floating point issues
+        if (Math.abs(netAmount) > 0.01) {
+          // Use small threshold to avoid floating point issues
           if (netAmount > 0) {
             // person1 owes person2
             netDebts.push({ from: person1, to: person2, amount: netAmount });
@@ -139,7 +152,14 @@ function Statistics(): React.JSX.Element {
   };
 
   const totalDebts = calculateTotalDebts();
-  const billsWithDebts = bills.filter((bill) => bill.paidBy && bill.items.length > 0);
+  const billsWithDebts = bills.filter(
+    (bill) =>
+      bill.paid_by &&
+      items.reduce(
+        (total, item) => (item.bill_id === bill.id ? total + 1 : total),
+        0,
+      ) > 0,
+  );
 
   return (
     <div className="statistics-container">
@@ -164,7 +184,9 @@ function Statistics(): React.JSX.Element {
                         <span className="debt-arrow">→</span>
                         <span className="debt-to">{debt.to}</span>
                       </div>
-                      <span className="debt-amount">{debt.amount.toFixed(2)} €</span>
+                      <span className="debt-amount">
+                        {debt.amount.toFixed(2)} €
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -180,9 +202,12 @@ function Statistics(): React.JSX.Element {
                 <div className="bills-breakdown-list">
                   {billsWithDebts.map((bill) => {
                     const billDebts = calculateBillDebts(bill.id);
-                    const payer = friends.find((f) => f.id === bill.paidBy);
-                    const billTotal = bill.items.reduce(
-                      (total, item) => total + item.price * item.quantity,
+                    const payer = friends.find((f) => f.id === bill.paid_by);
+                    const billTotal = items.reduce(
+                      (total, item) =>
+                        item.bill_id === bill.id
+                          ? total + item.price * item.quantity
+                          : total,
                       0,
                     );
 
@@ -191,9 +216,13 @@ function Statistics(): React.JSX.Element {
                         <div className="bill-breakdown-header">
                           <h4>{bill.title}</h4>
                           <div className="bill-breakdown-info">
-                            <span className="bill-total">{billTotal.toFixed(2)} €</span>
+                            <span className="bill-total">
+                              {billTotal.toFixed(2)} €
+                            </span>
                             {payer && (
-                              <span className="bill-payer">Paid by: {payer.name}</span>
+                              <span className="bill-payer">
+                                Paid by: {payer.nick}
+                              </span>
                             )}
                           </div>
                         </div>

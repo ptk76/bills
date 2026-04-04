@@ -1,19 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Bill, Item, useAppContext } from "../context/AppContext";
+import React, { useState } from "react";
+import { Bill, useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
 function Home(): React.JSX.Element {
-  const {
-    friends,
-    items,
-    splits,
-    bills,
-    currentBillId,
-    createBill,
-    deleteBill,
-    selectBill,
-  } = useAppContext();
+  const { friends, items, splits, bills, createBill, deleteBill, selectBill } =
+    useAppContext();
   const [billTitle, setBillTitle] = useState<string>("");
   const navigate = useNavigate();
 
