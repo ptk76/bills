@@ -12,7 +12,9 @@ function Contact(): React.JSX.Element {
   };
 
   const handleDeleteName = (id: number) => {
-    deleteFriend(id);
+    if (confirm("Are you sure you want to delete this money return record?")) {
+      deleteFriend(id);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

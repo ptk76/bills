@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Item, useAppContext } from "../context/AppContext";
+import { Bill, Item, useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
 function Home(): React.JSX.Element {
-  const { friends, bills, currentBillId, createBill, deleteBill, selectBill } =
-    useAppContext();
+  const {
+    friends,
+    items,
+    splits,
+    bills,
+    currentBillId,
+    createBill,
+    deleteBill,
+    selectBill,
+  } = useAppContext();
   const [billTitle, setBillTitle] = useState<string>("");
   const navigate = useNavigate();
 
@@ -22,12 +30,12 @@ function Home(): React.JSX.Element {
     }
   };
 
-  const handleSelectBill = (billId: string) => {
+  const handleSelectBill = (billId: number) => {
     selectBill(billId);
     navigate("/about");
   };
 
-  const handleDeleteBill = (billId: string, e: React.MouseEvent) => {
+  const handleDeleteBill = (billId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm("Are you sure you want to delete this bill?")) {
       deleteBill(billId);
@@ -35,24 +43,38 @@ function Home(): React.JSX.Element {
   };
 
   const calculateBillTotal = (billId: number): number => {
-    const bill = bills.find((b) => b.id === billId);
-    if (!bill) return 0;
-    // TODO
-    // return bill.items.reduce(
-    //   (total, item) => total + item.price * item.quantity,
-    //   0,
-    // );
-    return 0;
+    return items.reduce(
+      (total, item) =>
+        total + (item.bill_id === billId ? item.price * item.quantity : 0),
+      0,
+    );
   };
 
-  const countPeople = (items: Item[]) => {
-    const people = new Set<String>();
-    // TODO
-    // items.forEach((item) =>
-    //   item.checkedNames.forEach((split) => people.add(split.friendId)),
-    // );
-    return people.size;
+  const countPeople = (billId: number) => {
+    const billItems = items.filter((item) => item.bill_id === billId);
+    const billSplits = splits.filter(
+      (split) =>
+        billItems.find((item) => item.id === split.item_id) &&
+        split.quantity !== 0,
+    );
+    return billSplits.length;
   };
+
+  const countItems = (billId: number) => {
+    return items.reduce(
+      (total, item) => total + (item.bill_id === billId ? 1 : 0),
+      0,
+    );
+  };
+
+  const paidBy = (bill: Bill) => {
+    if (bill.paid_by === null) return null;
+    const friend = friends.find((friend) => friend.id === bill.paid_by);
+    if (!friend) return null;
+
+    return friend.nick;
+  };
+
   return (
     <div className="home-container">
       <div className="bills-section">
@@ -76,47 +98,39 @@ function Home(): React.JSX.Element {
           <div className="bills-list">
             {bills.map((bill) => {
               const total = calculateBillTotal(bill.id);
-              const isSelected = bill.id === currentBillId;
               return (
                 <div
                   key={bill.id}
-                  className={`bill-card ${isSelected ? "selected" : ""}`}
+                  className={`bill-card`}
                   onClick={() => handleSelectBill(bill.id)}
                 >
                   <div className="bill-header">
                     <h3>{bill.title}</h3>
-                    {isSelected && (
-                      <span className="current-badge">Current</span>
-                    )}
-                  </div>
-                  <div className="bill-info">
-                    <div className="bill-stats">
-                      <span className="stat-item">
-                        <strong>TODO</strong> items
-                        {/* <strong>{bill.items.length}</strong> items */}
-                      </span>
-                      <span className="stat-item">
-                        <strong>{countPeople(bill.items)}</strong> people
-                      </span>
-                      <span className="stat-item">
-                        Paid by:{" "}
-                        <strong>
-                          {friends.find((friend) => friend.id === bill.paidBy)
-                            ?.nick ?? (
-                            <strong className="paid-by-none">NONE</strong>
-                          )}
-                        </strong>
-                      </span>
-                    </div>
-                    <div className="bill-total">{total.toFixed(2)} €</div>
-                  </div>
-                  <div className="bill-actions">
                     <button
                       onClick={(e) => handleDeleteBill(bill.id, e)}
                       className="delete-bill-button"
                     >
                       Delete
                     </button>
+                  </div>
+                  <div className="bill-info">
+                    <div className="bill-stats">
+                      <span className="stat-item">
+                        <strong>{countItems(bill.id)}</strong> items
+                      </span>
+                      <span className="stat-item">
+                        <strong>{countPeople(bill.id)}</strong> people
+                      </span>
+                      <span className="stat-item">
+                        Paid by:{" "}
+                        <strong>
+                          {paidBy(bill) ?? (
+                            <strong className="paid-by-none">NONE</strong>
+                          )}
+                        </strong>
+                      </span>
+                    </div>
+                    <div className="bill-total">{total.toFixed(2)} €</div>
                   </div>
                 </div>
               );

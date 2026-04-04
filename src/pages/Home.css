@@ -36,7 +36,6 @@
 
 .bill-title-input {
   flex: 1;
-  min-width: 300px;
   padding: 0.75rem;
   font-size: 1rem;
   border: 2px solid #ddd;
@@ -88,11 +87,6 @@
 .bill-card:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
-}
-
-.bill-card.selected {
-  border-color: #646cff;
-  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
 }
 
 .bill-header {
@@ -153,11 +147,6 @@
   font-size: 1.75rem;
   font-weight: bold;
   color: #4caf50;
-}
-
-.bill-actions {
-  display: flex;
-  justify-content: flex-end;
 }
 
 .delete-bill-button {

@@ -127,9 +127,7 @@ function items(params: URLSearchParams) {
     return `UPDATE items SET ${columns.join(",")} WHERE items.id = ${id};`;
   }
 
-  const bill_id = getNumber(params, "bill_id");
-  if (bill_id === undefined) return null;
-  return `SELECT * FROM items WHERE items.bill_id=${bill_id}`;
+  return `SELECT * FROM items`;
 }
 
 function splits(params: URLSearchParams) {

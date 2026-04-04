@@ -28,7 +28,8 @@ export interface Item {
 export interface Bill {
   id: number;
   title: string;
-  paidBy: number | null;
+  token: string;
+  paid_by: number | null;
 }
 
 export interface MoneyReturn {
@@ -100,7 +101,8 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
     setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
-    const i = (await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[];
+    // const i = (await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[];
+    const i = (await queryDatabase(`/items`)) as Item[];
     console.log("init ITEMS", i);
     setItems((await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[]);
     setSplits((await queryDatabase("/splits")) as Split[]);
@@ -145,7 +147,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
   const title = currentBill?.title || "Items & Billing";
-  const paidBy = currentBill?.paidBy || null;
+  const paidBy = currentBill?.paid_by || null;
 
   const createBill = async (billTitle: string) => {
     setQueryInProgress(true);
