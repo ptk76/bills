@@ -48,6 +48,9 @@ function bills(params: URLSearchParams) {
     return `UPDATE bills SET ${columns.join(",")} WHERE bills.id = ${id};`;
   }
 
+  const token = params.get("token");
+  if (token) return `SELECT * FROM bills WHERE bills.token = "${token}"`;
+
   return "SELECT * FROM bills";
 }
 

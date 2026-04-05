@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Bill, useAppContext } from "../context/AppContext";
-import { useNavigate } from "react-router-dom";
 import "./Home.css";
+import { Page } from "../App";
 
-function Home(): React.JSX.Element {
+function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
   const { friends, items, splits, bills, createBill, deleteBill, selectBill } =
     useAppContext();
   const [billTitle, setBillTitle] = useState<string>("");
-  const navigate = useNavigate();
 
   const handleCreateBill = () => {
     if (billTitle.trim() !== "") {
@@ -24,7 +23,7 @@ function Home(): React.JSX.Element {
 
   const handleSelectBill = (billId: number) => {
     selectBill(billId);
-    navigate("/about");
+    props.onNavigate("bill");
   };
 
   const handleDeleteBill = (billId: number, e: React.MouseEvent) => {

@@ -1,25 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import "./Navigation.css";
+import { Page } from "../App";
 
-function Navigation(): React.JSX.Element {
+function Navigation(props: {
+  onNavigate: (page: Page) => void;
+}): React.JSX.Element {
   return (
-    <nav className="navigation">
-      <ul>
-        <li>
-          <Link to="/">Bills</Link>
-        </li>
-        <li>
-          <Link to="/contact">Friends</Link>
-        </li>
-        <li>
-          <Link to="/statistics">Statistics</Link>
-        </li>
-        <li>
-          <Link to="/money-returns">Returns</Link>
-        </li>
-      </ul>
-    </nav>
+    <div className="navigation">
+      <div onClick={() => props.onNavigate("home")}>Home</div>
+      <div onClick={() => props.onNavigate("friends")}>Friends</div>
+      <div onClick={() => props.onNavigate("returns")}>Returns</div>
+      <div onClick={() => props.onNavigate("stats")}>Summary</div>
+    </div>
   );
 }
 

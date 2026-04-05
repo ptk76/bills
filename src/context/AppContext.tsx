@@ -96,7 +96,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
 
   const initData = async () => {
     setFriends((await queryDatabase("/friends")) as Friend[]);
-    const _bills = (await queryDatabase("/bills")) as Bill[];
+    const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
@@ -109,9 +109,6 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   };
 
   const loadItems = async () => {
-    const i = (await queryDatabase(
-      `/items?bill_id=${currentBillId}`,
-    )) as Item[];
     setItems(
       (await queryDatabase(`/items?bill_id=${currentBillId}`)) as Item[],
     );
@@ -150,7 +147,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     setQueryInProgress(true);
     const title = billTitle.trim() || "New Bill";
     await queryDatabase(`/bills?cmd=add&title=${title}&token=${token}`);
-    const _bills = (await queryDatabase("/bills")) as Bill[];
+    const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
@@ -161,7 +158,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   const deleteBill = async (billId: number) => {
     setQueryInProgress(true);
     await queryDatabase(`/bills?cmd=del&id=${billId}`);
-    const _bills = (await queryDatabase("/bills")) as Bill[];
+    const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
@@ -176,7 +173,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     if (!currentBillId) return;
     setQueryInProgress(true);
     await queryDatabase(`/bills?id=${currentBillId}&cmd=upd&title=${newTitle}`);
-    setBills((await queryDatabase("/bills")) as Bill[]);
+    setBills((await queryDatabase(`/bills?token=${token}`)) as Bill[]);
     setQueryInProgress(false);
   };
 
@@ -197,7 +194,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     setQueryInProgress(true);
     queryDatabase(`/friends?cmd=del&id=${friendId}`);
     setFriends((await queryDatabase("/friends")) as Friend[]);
-    setBills((await queryDatabase("/bills")) as Bill[]);
+    setBills((await queryDatabase(`/bills?token=${token}`)) as Bill[]);
     setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
     setQueryInProgress(false);
   };
@@ -313,7 +310,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     await queryDatabase(
       `/bills?id=${currentBillId}&cmd=upd&paid_by=${friendId}`,
     );
-    setBills((await queryDatabase("/bills")) as Bill[]);
+    setBills((await queryDatabase(`/bills?token=${token}`)) as Bill[]);
     setQueryInProgress(false);
   };
 
