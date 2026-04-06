@@ -3,8 +3,17 @@
 -- Friends
 CREATE TABLE IF NOT EXISTS friends (
     id INTEGER PRIMARY KEY NOT NULL,
-    nick TEXT NOT NULL
+    nick TEXT NOT NULL,
+    group_id TEXT,
+    FOREIGN KEY(group_id) REFERENCES groups(id) ON DELETE SET NULL
 );
+
+-- Families
+CREATE TABLE IF NOT EXISTS groups (
+    id INTEGER PRIMARY KEY NOT NULL,
+    surname TEXT NOT NULL
+);
+
 
 -- Bills
 CREATE TABLE IF NOT EXISTS bills (

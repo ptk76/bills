@@ -8,6 +8,7 @@ import Statistics from "./pages/Statistics";
 import MoneyReturns from "./pages/MoneyReturns";
 import "./App.css";
 import Scan from "./pages/Scan";
+import Groups from "./pages/Groups";
 
 function App(): React.JSX.Element {
   const { queryInProgress } = useAppContext();
@@ -27,6 +28,7 @@ function App(): React.JSX.Element {
           <div>{<Scan onNavigate={(page) => setMenu(page)} />} </div>
         )}
         {menu === "friends" && <div>{<Contact />} </div>}
+        {menu === "groups" && <div>{<Groups />} </div>}
         {menu === "returns" && <div>{<MoneyReturns />} </div>}
         {menu === "stats" && <div>{<Statistics />} </div>}
       </div>

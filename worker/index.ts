@@ -18,8 +18,29 @@ function friends(params: URLSearchParams) {
     if (nick === undefined) return null;
     return `INSERT INTO friends (nick) VALUES ("${nick}")`;
   }
-
+  if (cmd === "upd") {
+    const id = getNumber(params, "id");
+    const group_id = getNumber(params, "group_id") ?? null;
+    if (id === undefined) return null;
+    return `UPDATE friends SET group_id=${group_id} WHERE id = ${id};`;
+  }
   return "SELECT * FROM friends";
+}
+
+function groups(params: URLSearchParams) {
+  const cmd = params.get("cmd");
+  if (cmd === "del") {
+    const id = getNumber(params, "id");
+    if (id === undefined) return null;
+    return `DELETE FROM groups WHERE id = ${id};`;
+  }
+  if (cmd === "add") {
+    const surname = params.get("surname");
+    if (surname === undefined) return null;
+    return `INSERT INTO groups (surname) VALUES ("${surname}")`;
+  }
+
+  return "SELECT * FROM groups";
 }
 
 function bills(params: URLSearchParams) {
@@ -154,6 +175,7 @@ function splits(params: URLSearchParams) {
 function prepareSqlQuery(urlStr: string) {
   const url = new URL(urlStr);
   if (url.pathname.startsWith("/friends")) return friends(url.searchParams);
+  if (url.pathname.startsWith("/groups")) return groups(url.searchParams);
   if (url.pathname.startsWith("/bills")) return bills(url.searchParams);
   if (url.pathname.startsWith("/returns")) return returns(url.searchParams);
   if (url.pathname.startsWith("/items")) return items(url.searchParams);

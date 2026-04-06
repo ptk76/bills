@@ -9,6 +9,12 @@ import React, {
 export interface Friend {
   id: number;
   nick: string;
+  group_id: number;
+}
+
+export interface Group {
+  id: number;
+  surname: string;
 }
 
 export interface Split {
@@ -57,6 +63,10 @@ interface AppContextType {
   friends: Friend[];
   addFriend: (name: string) => void;
   deleteFriend: (id: number) => void;
+  updateFriend: (id: number, group_id: number | null) => void;
+  groups: Group[];
+  addGroup: (name: string) => void;
+  deleteGroup: (id: number) => void;
 
   items: Item[];
   addItem: (item: Omit<Item, "id">) => void;
@@ -79,8 +89,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const queryDatabase = async (api: string): Promise<unknown[]> => {
   try {
-    const friends = await fetch(api);
-    return await friends.json();
+    const result = await fetch(api);
+    return await result.json();
   } catch (_) {}
   return [];
 };
@@ -91,6 +101,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
 }) => {
   const [queryInProgress, setQueryInProgress] = useState<boolean>(true);
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [splits, setSplits] = useState<Split[]>([]);
   const [currentBillId, setCurrentBillId] = useState<number | null>(null);
@@ -100,6 +111,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
 
   const initData = async () => {
     setFriends((await queryDatabase("/friends")) as Friend[]);
+    setGroups((await queryDatabase("/groups")) as Group[]);
     const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
@@ -118,26 +130,9 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     initData();
   }, []);
 
-  // Save friends to localStorage whenever they change
-  useEffect(() => {
-    // saveToLocalStorage(STORAGE_KEYS.FRIENDS, friends);
-  }, [friends]);
-
-  // Save bills to localStorage whenever they change
-  useEffect(() => {
-    // saveToLocalStorage(STORAGE_KEYS.BILLS, bills);
-  }, [bills]);
-
-  // Save current bill ID to localStorage whenever it changes
-  useEffect(() => {
-    // saveToLocalStorage(STORAGE_KEYS.CURRENT_BILL_ID, currentBillId);
-    loadItems();
-  }, [currentBillId]);
-
-  // Save money returns to localStorage whenever they change
-  useEffect(() => {
-    // saveToLocalStorage(STORAGE_KEYS.MONEY_RETURNS, moneyReturns);
-  }, [moneyReturns]);
+  // useEffect(() => {
+  //   loadItems();
+  // }, [currentBillId]);
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
   const title = currentBill?.title || "Items & Billing";
@@ -220,14 +215,39 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
 
   const deleteFriend = async (friendId: number) => {
     setQueryInProgress(true);
-    queryDatabase(`/friends?cmd=del&id=${friendId}`);
+    await queryDatabase(`/friends?cmd=del&id=${friendId}`);
     setFriends((await queryDatabase("/friends")) as Friend[]);
     setBills((await queryDatabase(`/bills?token=${token}`)) as Bill[]);
     setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
     setQueryInProgress(false);
   };
 
-  type Tables = "friends" | "items" | "bills" | "splits" | "returns";
+  const updateFriend = async (id: number, groupId: number | null) => {
+    setQueryInProgress(true);
+
+    await queryDatabase(`/friends?cmd=upd&id=${id}&group_id=${groupId}`);
+    setFriends((await queryDatabase("/friends")) as Friend[]);
+    setQueryInProgress(false);
+  };
+
+  const addGroup = async (name: string) => {
+    if (name.trim() === "") return;
+    setQueryInProgress(true);
+
+    await queryDatabase(`/groups?cmd=add&surname=${name}`);
+    setGroups((await queryDatabase("/groups")) as Group[]);
+    setQueryInProgress(false);
+  };
+
+  const deleteGroup = async (id: number) => {
+    setQueryInProgress(true);
+    await queryDatabase(`/groups?cmd=del&id=${id}`);
+    setGroups((await queryDatabase("/groups")) as Group[]);
+    setFriends((await queryDatabase("/friends")) as Friend[]);
+    setQueryInProgress(false);
+  };
+
+  type Tables = "friends" | "groups" | "items" | "bills" | "splits" | "returns";
 
   type QueryParams = {
     id?: number;
@@ -375,6 +395,10 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
         friends,
         addFriend,
         deleteFriend,
+        updateFriend,
+        groups,
+        addGroup,
+        deleteGroup,
         items,
         addItem,
         updateItem,
