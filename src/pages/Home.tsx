@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Bill, useAppContext } from "../context/AppContext";
 import "./Home.css";
-import { Page } from "../App";
+import { Page } from "../components/Navigation";
 
 function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
   const { friends, items, splits, bills, createBill, deleteBill, selectBill } =
@@ -24,6 +24,10 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
   const handleSelectBill = (billId: number) => {
     selectBill(billId);
     props.onNavigate("bill");
+  };
+
+  const handleCreateBillFromCsv = () => {
+    props.onNavigate("scan");
   };
 
   const handleDeleteBill = (billId: number, e: React.MouseEvent) => {
@@ -82,6 +86,12 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
           />
           <button onClick={handleCreateBill} className="create-bill-button">
             Create Bill
+          </button>
+          <button
+            onClick={handleCreateBillFromCsv}
+            className="create-bill-from-csv-button"
+          >
+            Create Bill from CSV
           </button>
         </div>
 

@@ -67,6 +67,18 @@
   background-color: #4248d4;
 }
 
+.create-bill-from-csv-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #8968d6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
 .bills-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

@@ -1,0 +1,558 @@
+.about-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.items-section {
+  padding: 1.5rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.items-section h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.title-header {
+  margin-bottom: 1.5rem;
+}
+
+.title-view-mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ddd;
+}
+
+.title-view-mode h2 {
+  margin: 0;
+}
+
+.edit-title-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.edit-title-button:hover {
+  background-color: #535bf2;
+}
+
+.edit-title-button:active {
+  background-color: #4248d4;
+}
+
+.title-edit-mode {
+  padding: 1rem;
+  background-color: #f9f9ff;
+  border: 2px solid #646cff;
+  border-radius: 4px;
+}
+
+.title-input {
+  width: stretch;
+  padding: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.3s;
+}
+
+.title-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.title-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.total-price-section {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.total-price-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.total-price-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-price-amount {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.names-summary-section {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.names-summary-section h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.names-summary-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.person-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem 1rem;
+}
+
+.person-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.person-radio {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.person-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.person-total {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.person-summary-item.selected .person-total {
+  color: #646cff;
+}
+
+.add-item-form {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.item-name-input,
+.item-price-input {
+  padding: 0.75rem;
+  height: 100%;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.item-name-input {
+  flex: 2;
+  min-width: 200px;
+}
+
+.item-price-input {
+  flex: 1;
+  min-width: 100px;
+}
+
+.item-name-input:focus,
+.item-price-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.add-bill-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.add-bill-button:hover {
+  background-color: #535bf2;
+}
+
+.add-bill-button:active {
+  background-color: #4248d4;
+}
+
+.add-bill-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.warning-message {
+  padding: 1rem;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  margin-bottom: 1rem;
+}
+
+.parsed-list {
+  display: flex;
+  gap: 1rem;
+}
+
+.parsed-card {
+  background-color: white;
+  color: #333;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.parsed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.parsed-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.parsed-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.parsed-price-container {
+  display: flex;
+}
+
+.parsed-price {
+  margin-top: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.parsed-quantity {
+  margin-top: 0;
+  margin-left: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.wrong {
+  font-weight: bold;
+  color: red;
+}
+
+.parsed-price-total {
+  margin-top: 0;
+  margin-left: auto;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #646cff;
+}
+
+.edit-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.edit-button:hover {
+  background-color: #535bf2;
+}
+
+.edit-button:active {
+  background-color: #4248d4;
+}
+
+.delete-item-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-item-button:hover {
+  background-color: #cc0000;
+}
+
+.delete-item-button:active {
+  background-color: #aa0000;
+}
+
+.edit-mode {
+  padding: 1rem;
+  background-color: #f9f9ff;
+  border: 2px solid #646cff;
+  border-radius: 4px;
+}
+
+.edit-header h3 {
+  margin: 0 0 1rem 0;
+  color: #646cff;
+  font-size: 1.1rem;
+}
+
+.edit-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.edit-name-input,
+.edit-price-input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.edit-name-input {
+  flex: 2;
+  min-width: 200px;
+}
+
+.edit-price-input {
+  flex: 1;
+  min-width: 100px;
+}
+
+.edit-name-input:focus,
+.edit-price-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover {
+  background-color: #45a049;
+}
+
+.save-button:active {
+  background-color: #3d8b40;
+}
+
+.cancel-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background-color: #999;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cancel-button:hover {
+  background-color: #777;
+}
+
+.cancel-button:active {
+  background-color: #666;
+}
+
+.names-checkboxes {
+  margin-bottom: 1rem;
+}
+
+.names-checkboxes h4 {
+  margin: 0 0 0.75rem 0;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.checkbox-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.no-split {
+  opacity: 0.3;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+  user-select: none;
+}
+
+.checkbox-label:hover {
+  background-color: #e8e8f8;
+  border-color: #646cff;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.checkbox-name {
+  font-size: 0.95rem;
+  color: #333;
+  display: flex;
+}
+
+.checkbox-quantity {
+  margin-left: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+.checkbox-split {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.checkbox-hide {
+  display: none;
+}
+
+.item-summary {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.split-info {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.per-person {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.empty-message {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem 1rem;
+}
+
+.table-header {
+  display: flex;
+  border-bottom: #ddd solid 1px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: #eee solid 1px;
+  font-size: 0.9rem;
+}
+
+.valid-column {
+  /* margin-right: 2px; */
+  /* width: 18px; */
+  min-width: 18px;
+  font-size: 0.8rem;
+}
+
+.name-column {}
+
+.quantity-column {
+  margin-left: auto;
+  width: 60px;
+  margin-right: 4px;
+  text-align: end;
+}
+
+.unit-price-column {
+  min-width: 60px;
+  margin-right: 4px;
+  text-align: end;
+}
+
+.total-price-column {
+  min-width: 60px;
+  margin-right: 0;
+  text-align: end;
+}

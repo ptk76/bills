@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { useAppContext } from "./context/AppContext";
-import Navigation from "./components/Navigation";
+import Navigation, { Page } from "./components/Navigation";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Statistics from "./pages/Statistics";
 import MoneyReturns from "./pages/MoneyReturns";
 import "./App.css";
-
-export type Page = "home" | "bill" | "friends" | "returns" | "stats";
+import Scan from "./pages/Scan";
 
 function App(): React.JSX.Element {
   const { queryInProgress } = useAppContext();
@@ -24,6 +23,9 @@ function App(): React.JSX.Element {
           <div>{<Home onNavigate={(page) => setMenu(page)} />} </div>
         )}
         {menu === "bill" && <div>{<About />} </div>}
+        {menu === "scan" && (
+          <div>{<Scan onNavigate={(page) => setMenu(page)} />} </div>
+        )}
         {menu === "friends" && <div>{<Contact />} </div>}
         {menu === "returns" && <div>{<MoneyReturns />} </div>}
         {menu === "stats" && <div>{<Statistics />} </div>}

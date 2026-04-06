@@ -1,6 +1,7 @@
 import React from "react";
 import "./Navigation.css";
-import { Page } from "../App";
+
+export type Page = "home" | "bill" | "friends" | "returns" | "stats" | "scan";
 
 function Navigation(props: {
   onNavigate: (page: Page) => void;

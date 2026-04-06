@@ -27,7 +27,7 @@ function bills(params: URLSearchParams) {
     const title = params.get("title");
     const token = params.get("token");
     if (!title || !token) return null;
-    return `INSERT INTO bills (title, token) VALUES ("${title}", "${token}")`;
+    return `INSERT INTO bills (title, token) VALUES ("${title}", "${token}") RETURNING id`;
   }
   if (params.get("cmd") === "del") {
     const id = getNumber(params, "id");

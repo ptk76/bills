@@ -46,6 +46,10 @@ interface AppContextType {
   currentBillId: number | null;
   currentBill: Bill | null;
   createBill: (title: string) => void;
+  createFullBill: (
+    title: string,
+    items: Omit<Item, "id" | "bill_id">[],
+  ) => void;
   deleteBill: (billId: number) => void;
   selectBill: (billId: number) => void;
   updateBillTitle: (title: string) => void;
@@ -101,17 +105,13 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
     setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
-    // const i = (await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[];
-    const i = (await queryDatabase(`/items`)) as Item[];
-    setItems((await queryDatabase(`/items?bill_id=${currentBill}`)) as Item[]);
+    setItems((await queryDatabase(`/items`)) as Item[]);
     setSplits((await queryDatabase("/splits")) as Split[]);
     setQueryInProgress(false);
   };
 
   const loadItems = async () => {
-    setItems(
-      (await queryDatabase(`/items?bill_id=${currentBillId}`)) as Item[],
-    );
+    setItems((await queryDatabase(`/items`)) as Item[]);
   };
 
   useEffect(() => {
@@ -145,13 +145,41 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
 
   const createBill = async (billTitle: string) => {
     setQueryInProgress(true);
-    const title = billTitle.trim() || "New Bill";
-    await queryDatabase(`/bills?cmd=add&title=${title}&token=${token}`);
+    const title = billTitle.trim() || "Monkey";
+    const newBiil = await queryDatabase(
+      `/bills?cmd=add&title=${title}&token=${token}`,
+    );
     const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
 
+    setQueryInProgress(false);
+  };
+
+  const createFullBill = async (
+    billTitle: string,
+    items: Omit<Item, "id" | "bill_id">[],
+  ) => {
+    setQueryInProgress(true);
+    const title = billTitle.trim() || "Monkey";
+
+    const result = (await queryDatabase(
+      `/bills?cmd=add&title=${title}&token=${token}`,
+    )) as Bill[];
+    const newBillId = result[0] ? result[0].id : undefined;
+
+    if (newBillId) {
+      items.forEach(async (item) => {
+        await queryDatabase(
+          `/items?cmd=add&bill_id=${newBillId}&title=${item.title}&price=${item.price}&quantity=${item.quantity})`,
+        );
+      });
+    }
+
+    const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
+    setBills(_bills);
+    setItems((await queryDatabase(`/items`)) as Item[]);
     setQueryInProgress(false);
   };
 
@@ -340,6 +368,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
         currentBillId,
         currentBill,
         createBill,
+        createFullBill,
         deleteBill,
         selectBill,
         updateBillTitle,
