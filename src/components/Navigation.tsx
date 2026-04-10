@@ -19,7 +19,7 @@ function Navigation(props: {
       <div onClick={() => props.onNavigate("friends")}>Friends</div>
       <div onClick={() => props.onNavigate("groups")}>Tribes</div>
       <div onClick={() => props.onNavigate("returns")}>Returns</div>
-      <div onClick={() => props.onNavigate("stats")}>Summary</div>
+      <div onClick={() => props.onNavigate("stats")}>Debts</div>
     </div>
   );
 }
