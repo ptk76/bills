@@ -9,6 +9,7 @@ import MoneyReturns from "./pages/MoneyReturns";
 import "./App.css";
 import Scan from "./pages/Scan";
 import Groups from "./pages/Groups";
+import Token from "./components/Token";
 
 function App(): React.JSX.Element {
   const { queryInProgress } = useAppContext();
@@ -17,6 +18,7 @@ function App(): React.JSX.Element {
     <div className="app">
       <Navigation onNavigate={(page) => setMenu(page)} />
       <div className="loader-container">
+        <Token />
         {queryInProgress && <div className="loader"></div>}
       </div>
       <div className="content">

@@ -2,6 +2,7 @@
 
 -- Friends
 CREATE TABLE IF NOT EXISTS friends (
+    token TEXT NOT NULL,
     id INTEGER PRIMARY KEY NOT NULL,
     nick TEXT NOT NULL,
     group_id TEXT,
@@ -10,6 +11,7 @@ CREATE TABLE IF NOT EXISTS friends (
 
 -- Families
 CREATE TABLE IF NOT EXISTS groups (
+    token TEXT NOT NULL,
     id INTEGER PRIMARY KEY NOT NULL,
     surname TEXT NOT NULL
 );
@@ -17,9 +19,9 @@ CREATE TABLE IF NOT EXISTS groups (
 
 -- Bills
 CREATE TABLE IF NOT EXISTS bills (
+    token TEXT NOT NULL,
     id INTEGER PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
-    token TEXT NOT NULL,
     paid_by INTEGER,
     FOREIGN KEY(paid_by) REFERENCES friends(id) ON DELETE SET NULL
 );
@@ -47,20 +49,21 @@ CREATE TABLE IF NOT EXISTS splits (
 
 -- Returns
 CREATE TABLE IF NOT EXISTS returns (
+    token TEXT NOT NULL,
     id INTEGER PRIMARY KEY NOT NULL,
     from_friend_id INTEGER NOT NULL,
     to_friend_id INTEGER NOT NULL,
     title TEXT,
     amount INTEGER NOT NULL,
-    FOREIGN KEY(from_friend_id) REFERENCES friends(id) ON DELETE CASCADE
+    FOREIGN KEY(from_friend_id) REFERENCES friends(id) ON DELETE CASCADE,
     FOREIGN KEY(to_friend_id) REFERENCES friends(id) ON DELETE CASCADE
 );
 
-INSERT INTO bills (title, token)
+INSERT INTO bills (token, title)
 VALUES
-    ('Konoba Mario', 'test'),
-    ('Rakija', 'test'),
-    ('Opłaty portowe', 'test')
+    ('test', 'Konoba Mario'),
+    ('test', 'Rakija'),
+    ('test', 'Opłaty portowe')
 ;
 
 INSERT INTO items (title,price,quantity,bill_id)
@@ -74,11 +77,11 @@ VALUES
     ('Sweta N', 35, 1, 3)
 ;
 
-INSERT INTO friends (nick)
+INSERT INTO friends (token, nick)
 VALUES
-    ('Dyzio'),
-    ('Gucio'),
-    ('Zosia'),
-    ('Gertruda'),
-    ('Helgonia')
+    ('test', 'Dyzio'),
+    ('test', 'Gucio'),
+    ('test', 'Zosia'),
+    ('test', 'Gertruda'),
+    ('test', 'Helgonia')
 ;

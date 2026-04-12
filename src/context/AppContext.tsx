@@ -47,6 +47,7 @@ export interface MoneyReturn {
 }
 
 interface AppContextType {
+  token: string;
   queryInProgress: boolean;
   bills: Bill[];
   currentBillId: number | null;
@@ -110,29 +111,23 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   const [moneyReturns, setMoneyReturns] = useState<MoneyReturn[]>([]);
 
   const initData = async () => {
-    setFriends((await queryDatabase("/friends")) as Friend[]);
-    setGroups((await queryDatabase("/groups")) as Group[]);
+    setFriends((await queryDatabase(`/friends?token=${token}`)) as Friend[]);
+    setGroups((await queryDatabase(`/groups?token=${token}`)) as Group[]);
     const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
-    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    setMoneyReturns(
+      (await queryDatabase(`/returns?token=${token}`)) as MoneyReturn[],
+    );
     setItems((await queryDatabase(`/items`)) as Item[]);
     setSplits((await queryDatabase("/splits")) as Split[]);
     setQueryInProgress(false);
   };
 
-  const loadItems = async () => {
-    setItems((await queryDatabase(`/items`)) as Item[]);
-  };
-
   useEffect(() => {
     initData();
   }, []);
-
-  // useEffect(() => {
-  //   loadItems();
-  // }, [currentBillId]);
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
   const title = currentBill?.title || "Items & Billing";
@@ -141,9 +136,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   const createBill = async (billTitle: string) => {
     setQueryInProgress(true);
     const title = billTitle.trim() || "Monkey";
-    const newBiil = await queryDatabase(
-      `/bills?cmd=add&title=${title}&token=${token}`,
-    );
+    await queryDatabase(`/bills?cmd=add&title=${title}&token=${token}`);
     const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
@@ -208,17 +201,19 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     if (name.trim() === "") return;
     setQueryInProgress(true);
 
-    await queryDatabase(`/friends?cmd=add&nick=${name}`);
-    setFriends((await queryDatabase("/friends")) as Friend[]);
+    await queryDatabase(`/friends?cmd=add&token=${token}&nick=${name}`);
+    setFriends((await queryDatabase(`/friends?token=${token}`)) as Friend[]);
     setQueryInProgress(false);
   };
 
   const deleteFriend = async (friendId: number) => {
     setQueryInProgress(true);
     await queryDatabase(`/friends?cmd=del&id=${friendId}`);
-    setFriends((await queryDatabase("/friends")) as Friend[]);
+    setFriends((await queryDatabase(`/friends?token=${token}`)) as Friend[]);
     setBills((await queryDatabase(`/bills?token=${token}`)) as Bill[]);
-    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    setMoneyReturns(
+      (await queryDatabase(`/returns?token=${token}`)) as MoneyReturn[],
+    );
     setQueryInProgress(false);
   };
 
@@ -226,7 +221,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     setQueryInProgress(true);
 
     await queryDatabase(`/friends?cmd=upd&id=${id}&group_id=${groupId}`);
-    setFriends((await queryDatabase("/friends")) as Friend[]);
+    setFriends((await queryDatabase(`/friends?token=${token}`)) as Friend[]);
     setQueryInProgress(false);
   };
 
@@ -234,16 +229,16 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     if (name.trim() === "") return;
     setQueryInProgress(true);
 
-    await queryDatabase(`/groups?cmd=add&surname=${name}`);
-    setGroups((await queryDatabase("/groups")) as Group[]);
+    await queryDatabase(`/groups?cmd=add&token=${token}&surname=${name}`);
+    setGroups((await queryDatabase(`/groups?token=${token}`)) as Group[]);
     setQueryInProgress(false);
   };
 
   const deleteGroup = async (id: number) => {
     setQueryInProgress(true);
     await queryDatabase(`/groups?cmd=del&id=${id}`);
-    setGroups((await queryDatabase("/groups")) as Group[]);
-    setFriends((await queryDatabase("/friends")) as Friend[]);
+    setGroups((await queryDatabase(`/groups?token=${token}`)) as Group[]);
+    setFriends((await queryDatabase(`/friends?token=${token}`)) as Friend[]);
     setQueryInProgress(false);
   };
 
@@ -367,22 +362,27 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   ) => {
     setQueryInProgress(true);
     await queryDatabase(
-      `/returns?cmd=add&from_friend_id=${moneyReturn.from_friend_id}&to_friend_id=${moneyReturn.to_friend_id}&amount=${moneyReturn.amount}&title=${moneyReturn.title}`,
+      `/returns?cmd=add?token=${token}&from_friend_id=${moneyReturn.from_friend_id}&to_friend_id=${moneyReturn.to_friend_id}&amount=${moneyReturn.amount}&title=${moneyReturn.title}`,
     );
-    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    setMoneyReturns(
+      (await queryDatabase(`/returns?token=${token}`)) as MoneyReturn[],
+    );
     setQueryInProgress(false);
   };
 
   const deleteMoneyReturn = async (id: number) => {
     setQueryInProgress(true);
     await queryDatabase(`/returns?cmd=del&id=${id}`);
-    setMoneyReturns((await queryDatabase("/returns")) as MoneyReturn[]);
+    setMoneyReturns(
+      (await queryDatabase(`/returns?token=${token}`)) as MoneyReturn[],
+    );
     setQueryInProgress(false);
   };
 
   return (
     <AppContext.Provider
       value={{
+        token,
         queryInProgress,
         bills,
         currentBillId,

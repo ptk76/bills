@@ -20,8 +20,8 @@
 
 .loader-container {
   height: 32px;
-  margin: 5px auto;
-  justify-items: center;
+  display: flex;
+  padding: 6px;
 }
 
 .loader {

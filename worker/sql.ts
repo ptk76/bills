@@ -13,18 +13,22 @@ function friends(params: URLSearchParams) {
     if (id === undefined) return null;
     return `DELETE FROM friends WHERE friends.id = ${id};`;
   }
-  if (cmd === "add") {
-    const nick = params.get("nick");
-    if (nick === undefined) return null;
-    return `INSERT INTO friends (nick) VALUES ("${nick}")`;
-  }
   if (cmd === "upd") {
     const id = getNumber(params, "id");
     const group_id = getNumber(params, "group_id") ?? null;
     if (id === undefined) return null;
     return `UPDATE friends SET group_id=${group_id} WHERE id = ${id};`;
   }
-  return "SELECT * FROM friends";
+  const token = params.get("token");
+  if (!token) return null;
+
+  if (cmd === "add") {
+    const nick = params.get("nick");
+    if (nick === undefined) return null;
+    return `INSERT INTO friends (token, nick) VALUES ("${token}", "${nick}")`;
+  }
+
+  return `SELECT * FROM friends WHERE friends.token = "${token}"`;
 }
 
 function groups(params: URLSearchParams) {
@@ -34,11 +38,14 @@ function groups(params: URLSearchParams) {
     if (id === undefined) return null;
     return `DELETE FROM groups WHERE id = ${id};`;
   }
+  const token = params.get("token");
   if (cmd === "add") {
     const surname = params.get("surname");
     if (surname === undefined) return null;
-    return `INSERT INTO groups (surname) VALUES ("${surname}")`;
+    return `INSERT INTO groups (token, surname) VALUES ("${token}", "${surname}")`;
   }
+
+  if (token) return `SELECT * FROM groups WHERE groups.token = "${token}"`;
 
   return "SELECT * FROM groups";
 }
@@ -76,26 +83,14 @@ function bills(params: URLSearchParams) {
 }
 
 function returns(params: URLSearchParams) {
-  if (params.size === 0) return "SELECT * FROM returns";
-
-  if (params.get("cmd") === "add") {
-    const from_friend_id = getNumber(params, "from_friend_id");
-    const to_friend_id = getNumber(params, "to_friend_id");
-    if (!from_friend_id || !to_friend_id) return null;
-
-    const amount = getNumber(params, "amount");
-    if (amount === undefined || amount === 0) return null;
-    const title = params.get("title") ?? null;
-    return `INSERT INTO returns (from_friend_id, to_friend_id, title, amount) VALUES (${from_friend_id}, ${to_friend_id}, "${title}", ${amount})`;
-  }
-
   const id = getNumber(params, "id");
-  if (id === undefined) return null;
 
   if (params.get("cmd") === "del") {
+    if (id === undefined) return null;
     return `DELETE FROM returns WHERE returns.id = ${id};`;
   }
   if (params.get("cmd") === "upd") {
+    if (id === undefined) return null;
     const from_friend_id = getNumber(params, "from_friend_id");
     const to_friend_id = getNumber(params, "friend_id");
     const title = params.get("title");
@@ -111,7 +106,21 @@ function returns(params: URLSearchParams) {
 
     return `UPDATE returns SET ${columns.join(",")} WHERE returns.id = ${id};`;
   }
-  return null;
+  const token = params.get("token");
+  if (!token) return null;
+
+  if (params.get("cmd") === "add") {
+    const from_friend_id = getNumber(params, "from_friend_id");
+    const to_friend_id = getNumber(params, "to_friend_id");
+    if (!from_friend_id || !to_friend_id) return null;
+
+    const amount = getNumber(params, "amount");
+    if (amount === undefined || amount === 0) return null;
+    const title = params.get("title") ?? null;
+    return `INSERT INTO returns (token, from_friend_id, to_friend_id, title, amount) VALUES ("${token}", ${from_friend_id}, ${to_friend_id}, "${title}", ${amount})`;
+  }
+
+  return `SELECT * FROM returns WHERE token="${token}"`;
 }
 
 function items(params: URLSearchParams) {
