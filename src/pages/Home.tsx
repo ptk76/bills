@@ -45,23 +45,6 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
     );
   };
 
-  const countPeople = (billId: number) => {
-    const billItems = items.filter((item) => item.bill_id === billId);
-    const billSplits = splits.filter(
-      (split) =>
-        billItems.find((item) => item.id === split.item_id) &&
-        split.quantity !== 0,
-    );
-    return billSplits.length;
-  };
-
-  const countItems = (billId: number) => {
-    return items.reduce(
-      (total, item) => total + (item.bill_id === billId ? 1 : 0),
-      0,
-    );
-  };
-
   const paidBy = (bill: Bill) => {
     if (bill.paid_by === null) return null;
     const friend = friends.find((friend) => friend.id === bill.paid_by);
@@ -107,21 +90,10 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
                 >
                   <div className="bill-header">
                     <h3>{bill.title}</h3>
-                    <button
-                      onClick={(e) => handleDeleteBill(bill.id, e)}
-                      className="delete-bill-button"
-                    >
-                      Delete
-                    </button>
+                    <div className="bill-total">{total.toFixed(2)} €</div>
                   </div>
                   <div className="bill-info">
                     <div className="bill-stats">
-                      <span className="stat-item">
-                        <strong>{countItems(bill.id)}</strong> items
-                      </span>
-                      <span className="stat-item">
-                        <strong>{countPeople(bill.id)}</strong> people
-                      </span>
                       <span className="stat-item">
                         Paid by:{" "}
                         <strong>
@@ -131,7 +103,12 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
                         </strong>
                       </span>
                     </div>
-                    <div className="bill-total">{total.toFixed(2)} €</div>
+                    <button
+                      onClick={(e) => handleDeleteBill(bill.id, e)}
+                      className="delete-bill-button"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               );
