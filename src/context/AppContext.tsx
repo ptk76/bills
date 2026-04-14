@@ -362,7 +362,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   ) => {
     setQueryInProgress(true);
     await queryDatabase(
-      `/returns?cmd=add?token=${token}&from_friend_id=${moneyReturn.from_friend_id}&to_friend_id=${moneyReturn.to_friend_id}&amount=${moneyReturn.amount}&title=${moneyReturn.title}`,
+      `/returns?cmd=add&token=${token}&from_friend_id=${moneyReturn.from_friend_id}&to_friend_id=${moneyReturn.to_friend_id}&amount=${moneyReturn.amount}&title=${moneyReturn.title}`,
     );
     setMoneyReturns(
       (await queryDatabase(`/returns?token=${token}`)) as MoneyReturn[],

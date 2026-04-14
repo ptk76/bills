@@ -7,7 +7,7 @@ function MoneyReturns(): React.JSX.Element {
     useAppContext();
   const [fromFriendId, setFromFriendId] = useState<number | null>(null);
   const [toFriendId, setToFriendId] = useState<number | null>(null);
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<number | null>(null);
   const [title, setTitle] = useState<string | null>(null);
 
   const handleAddReturn = () => {
@@ -15,7 +15,8 @@ function MoneyReturns(): React.JSX.Element {
       !fromFriendId ||
       !toFriendId ||
       fromFriendId === toFriendId ||
-      amount === 0
+      amount === 0 ||
+      amount === null
     )
       return;
 
@@ -27,7 +28,7 @@ function MoneyReturns(): React.JSX.Element {
     });
     setFromFriendId(null);
     setToFriendId(null);
-    setAmount(0);
+    setAmount(null);
     setTitle(null);
   };
 
@@ -66,7 +67,7 @@ function MoneyReturns(): React.JSX.Element {
                   <label htmlFor="from-friend">From:</label>
                   <select
                     id="from-friend"
-                    value={fromFriendId ?? undefined}
+                    value={fromFriendId ?? ""}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
                       setFromFriendId(isNaN(val) ? null : val);
@@ -86,7 +87,7 @@ function MoneyReturns(): React.JSX.Element {
                   <label htmlFor="to-friend">To:</label>
                   <select
                     id="to-friend"
-                    value={toFriendId ?? undefined}
+                    value={toFriendId ?? ""}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
                       setToFriendId(isNaN(val) ? null : val);
@@ -107,7 +108,7 @@ function MoneyReturns(): React.JSX.Element {
                   <input
                     id="amount"
                     type="number"
-                    value={amount ?? undefined}
+                    value={amount ?? ""}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value);
                       setAmount(isNaN(val) ? 0 : val);
@@ -127,7 +128,7 @@ function MoneyReturns(): React.JSX.Element {
                   <input
                     id="description"
                     type="text"
-                    value={title ?? undefined}
+                    value={title ?? ""}
                     onChange={(e) => setTitle(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="e.g., Payment for dinner, Rent share"

@@ -86,8 +86,6 @@ function Statistics(): React.JSX.Element {
       });
     });
 
-    console.log(1, spendIds);
-
     const idToNick = (friend_id: number | null) => {
       if (friend_id === null) return null;
 

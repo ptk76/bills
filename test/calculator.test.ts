@@ -387,9 +387,7 @@ describe("balanceDebts", () => {
         ]),
       ],
     ]);
-    console.log("IN", matrix);
     const result = ab.balanceDebts(matrix);
-    console.log("OUT", result);
     expect(result).toEqual(expectedMatrix);
   });
 });
