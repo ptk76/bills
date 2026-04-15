@@ -5,6 +5,7 @@ import "./About.css";
 function About(): React.JSX.Element {
   const {
     currentBillId,
+    currency,
     friends,
     splits,
     items,
@@ -212,7 +213,7 @@ function About(): React.JSX.Element {
             <div className="total-price-content">
               <span className="total-price-label">Total Price:</span>
               <span className="total-price-amount">
-                {calculateTotalPrice().toFixed(2)} €
+                {calculateTotalPrice().toFixed(2)} {currency}
               </span>
             </div>
           </div>
@@ -254,7 +255,9 @@ function About(): React.JSX.Element {
                 return (
                   <div key={friend.id} className={`person-summary-item`}>
                     <span className="person-name">{friend.nick}</span>
-                    <span className="person-total">{total.toFixed(2)} €</span>
+                    <span className="person-total">
+                      {total.toFixed(2)} {currency}
+                    </span>
                   </div>
                 );
               })}
@@ -383,10 +386,12 @@ function About(): React.JSX.Element {
                         </div>
                       </div>
                       <div className="item-price-container">
-                        <p className="item-price">{item.price.toFixed(2)} € </p>
+                        <p className="item-price">
+                          {item.price.toFixed(2)} {currency}{" "}
+                        </p>
                         <p className="item-quantity">x {item.quantity}</p>
                         <p className="item-price-total">
-                          {(item.price * item.quantity).toFixed(2)} €
+                          {(item.price * item.quantity).toFixed(2)} {currency}
                         </p>
                       </div>
 

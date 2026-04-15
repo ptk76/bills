@@ -4,8 +4,15 @@ import "./Home.css";
 import { Page } from "../components/Navigation";
 
 function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
-  const { friends, items, splits, bills, createBill, deleteBill, selectBill } =
-    useAppContext();
+  const {
+    currency,
+    friends,
+    items,
+    bills,
+    createBill,
+    deleteBill,
+    selectBill,
+  } = useAppContext();
   const [billTitle, setBillTitle] = useState<string>("");
 
   const handleCreateBill = () => {
@@ -90,7 +97,9 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
                 >
                   <div className="bill-header">
                     <h3>{bill.title}</h3>
-                    <div className="bill-total">{total.toFixed(2)} €</div>
+                    <div className="bill-total">
+                      {total.toFixed(2)} {currency}
+                    </div>
                   </div>
                   <div className="bill-info">
                     <div className="bill-stats">

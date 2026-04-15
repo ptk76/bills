@@ -10,7 +10,7 @@ interface Debt {
 }
 
 function Statistics(): React.JSX.Element {
-  const { friends, groups, bills, items, splits, moneyReturns } =
+  const { currency, friends, groups, bills, items, splits, moneyReturns } =
     useAppContext();
 
   // Calculate how much each person owes for a specific bill
@@ -209,7 +209,7 @@ function Statistics(): React.JSX.Element {
                         )}
                       </div>
                       <span className="debt-amount">
-                        {debt.amount.toFixed(2)} €
+                        {debt.amount.toFixed(2)} {currency}
                       </span>
                     </div>
                   ))}
@@ -234,7 +234,7 @@ function Statistics(): React.JSX.Element {
                         )}
                       </div>
                       <span className="debt-amount">
-                        {debt.amount.toFixed(2)} €
+                        {debt.amount.toFixed(2)} {currency}
                       </span>
                     </div>
                   ))}
@@ -266,7 +266,7 @@ function Statistics(): React.JSX.Element {
                           <h4>{bill.title}</h4>
                           <div className="bill-breakdown-info">
                             <span className="bill-total">
-                              {billTotal.toFixed(2)} €
+                              {billTotal.toFixed(2)} {currency}
                             </span>
                             {payer && (
                               <span className="bill-payer">
@@ -285,7 +285,7 @@ function Statistics(): React.JSX.Element {
                                   <span className="debt-to">{debt.to}</span>
                                 </div>
                                 <span className="debt-amount">
-                                  {debt.amount.toFixed(2)} €
+                                  {debt.amount.toFixed(2)} {currency}
                                 </span>
                               </div>
                             ))}

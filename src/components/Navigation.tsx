@@ -15,7 +15,7 @@ function Navigation(props: {
 }): React.JSX.Element {
   return (
     <div className="navigation">
-      <div onClick={() => props.onNavigate("home")}>BIlls</div>
+      <div onClick={() => props.onNavigate("home")}>Bills</div>
       <div onClick={() => props.onNavigate("friends")}>Friends</div>
       <div onClick={() => props.onNavigate("groups")}>Tribes</div>
       <div onClick={() => props.onNavigate("returns")}>Returns</div>

@@ -3,7 +3,7 @@ import { useAppContext } from "../context/AppContext";
 import "./MoneyReturns.css";
 
 function MoneyReturns(): React.JSX.Element {
-  const { friends, moneyReturns, addMoneyReturn, deleteMoneyReturn } =
+  const { currency, friends, moneyReturns, addMoneyReturn, deleteMoneyReturn } =
     useAppContext();
   const [fromFriendId, setFromFriendId] = useState<number | null>(null);
   const [toFriendId, setToFriendId] = useState<number | null>(null);
@@ -104,7 +104,7 @@ function MoneyReturns(): React.JSX.Element {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="amount">Amount (€):</label>
+                  <label htmlFor="amount">Amount ({currency}):</label>
                   <input
                     id="amount"
                     type="number"
@@ -167,7 +167,7 @@ function MoneyReturns(): React.JSX.Element {
                         </span>
                       </div>
                       <div className="return-amount">
-                        {moneyReturn.amount.toFixed(2)} €
+                        {moneyReturn.amount.toFixed(2)} {currency}
                       </div>
                     </div>
                     {moneyReturn.title && (

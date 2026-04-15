@@ -48,6 +48,7 @@ export interface MoneyReturn {
 
 interface AppContextType {
   token: string;
+  currency: string;
   queryInProgress: boolean;
   bills: Bill[];
   currentBillId: number | null;
@@ -100,6 +101,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   children,
   token,
 }) => {
+  const [currency, setCurrency] = useState("");
   const [queryInProgress, setQueryInProgress] = useState<boolean>(true);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -383,6 +385,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
     <AppContext.Provider
       value={{
         token,
+        currency,
         queryInProgress,
         bills,
         currentBillId,
