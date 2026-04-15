@@ -1,6 +1,6 @@
 function getNumber(params: URLSearchParams, name: string) {
   if (params.has(name)) {
-    const int = parseInt(params.get(name)!);
+    const int = parseFloat(params.get(name)!);
     if (!isNaN(int)) return int;
   }
   return undefined;
