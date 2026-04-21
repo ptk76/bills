@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Bill, useAppContext } from "../context/AppContext";
 import "./Home.css";
 import { Page } from "../components/Navigation";
@@ -13,18 +13,12 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
     deleteBill,
     selectBill,
   } = useAppContext();
-  const [billTitle, setBillTitle] = useState<string>("");
 
-  const handleCreateBill = () => {
-    if (billTitle.trim() !== "") {
-      createBill(billTitle);
-      setBillTitle("");
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleCreateBill();
+  const handleCreateBill = async () => {
+    const billId = await createBill("Monkey");
+    if (billId !== undefined) {
+      selectBill(billId);
+      props.onNavigate("bill");
     }
   };
 
@@ -66,14 +60,6 @@ function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
         <h2>The Bills</h2>
 
         <div className="create-bill-form">
-          <input
-            type="text"
-            value={billTitle}
-            onChange={(e) => setBillTitle(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Enter bill title (e.g., Dinner Party, Trip to Paris)"
-            className="bill-title-input"
-          />
           <button onClick={handleCreateBill} className="create-bill-button">
             Create Bill
           </button>

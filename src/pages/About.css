@@ -58,7 +58,7 @@
 }
 
 .title-input {
-  width: 100%;
+  width: stretch;
   padding: 0.75rem;
   font-size: 1.25rem;
   font-weight: bold;

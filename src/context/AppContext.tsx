@@ -132,19 +132,22 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   }, []);
 
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
-  const title = currentBill?.title || "Items & Billing";
+  const title = currentBill?.title || "Monkey";
   const paidBy = currentBill?.paid_by || null;
 
   const createBill = async (billTitle: string) => {
     setQueryInProgress(true);
     const title = billTitle.trim() || "Monkey";
-    await queryDatabase(`/bills?cmd=add&title=${title}&token=${token}`);
+    const result = (await queryDatabase(
+      `/bills?cmd=add&title=${title}&token=${token}`,
+    )) as Bill[];
     const _bills = (await queryDatabase(`/bills?token=${token}`)) as Bill[];
     setBills(_bills);
     const currentBill = _bills[0] ? _bills[0].id : null;
     setCurrentBillId(currentBill);
 
     setQueryInProgress(false);
+    return result[0] ? result[0].id : undefined;
   };
 
   const createFullBill = async (

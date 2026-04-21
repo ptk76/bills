@@ -25,9 +25,10 @@ function About(): React.JSX.Element {
   const [editName, setEditName] = useState<string>("");
   const [editPrice, setEditPrice] = useState<string>("");
   const [editQuantity, setEditQuantity] = useState<string>("1");
-  const [editingTitle, setEditingTitle] = useState<boolean>(false);
+  const [editingTitle, setEditingTitle] = useState<boolean>(
+    title === "Monkey" ? true : false,
+  );
   const [tempTitle, setTempTitle] = useState<string>("");
-
   const handleAddItem = () => {
     if (itemName.trim() !== "" && itemPrice.trim() !== "") {
       const price = parseFloat(itemPrice);
