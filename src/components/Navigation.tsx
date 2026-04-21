@@ -8,7 +8,8 @@ export type Page =
   | "groups"
   | "returns"
   | "stats"
-  | "scan";
+  | "scan"
+  | "add-return";
 
 function Navigation(props: {
   onNavigate: (page: Page) => void;

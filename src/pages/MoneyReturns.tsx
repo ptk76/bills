@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
-import "./MoneyReturns.css";
+import styles from "./MoneyReturns.module.css";
+import { Page } from "../components/Navigation";
 
-function MoneyReturns(): React.JSX.Element {
+function MoneyReturns(props: {
+  onNavigate: (page: Page) => void;
+}): React.JSX.Element {
   const { currency, friends, moneyReturns, addMoneyReturn, deleteMoneyReturn } =
     useAppContext();
   const [fromFriendId, setFromFriendId] = useState<number | null>(null);
@@ -32,12 +35,6 @@ function MoneyReturns(): React.JSX.Element {
     setTitle(null);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleAddReturn();
-    }
-  };
-
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this money return record?")) {
       deleteMoneyReturn(id);
@@ -50,135 +47,54 @@ function MoneyReturns(): React.JSX.Element {
   };
 
   return (
-    <div className="money-returns-container">
-      <div className="money-returns-section">
+    <div className={styles["money-returns-container"]}>
+      <div className={styles["money-returns-section"]}>
         <h2>Money Returns</h2>
 
         {friends.length < 2 ? (
-          <p className="warning-message">
+          <p className={styles["warning-message"]}>
             You need at least 2 friends to record money returns. Please add
             friends on the Friends page.
           </p>
         ) : (
           <>
-            <div className="add-return-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="from-friend">From:</label>
-                  <select
-                    id="from-friend"
-                    value={fromFriendId ?? ""}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      setFromFriendId(isNaN(val) ? null : val);
-                    }}
-                    className="friend-select"
-                  >
-                    <option value="">Select person</option>
-                    {friends.map((friend) => (
-                      <option key={friend.id} value={friend.id}>
-                        {friend.nick}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="to-friend">To:</label>
-                  <select
-                    id="to-friend"
-                    value={toFriendId ?? ""}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      setToFriendId(isNaN(val) ? null : val);
-                    }}
-                    className="friend-select"
-                  >
-                    <option value="">Select person</option>
-                    {friends.map((friend) => (
-                      <option key={friend.id} value={friend.id}>
-                        {friend.nick}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="amount">Amount ({currency}):</label>
-                  <input
-                    id="amount"
-                    type="number"
-                    value={amount ?? ""}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      setAmount(isNaN(val) ? 0 : val);
-                    }}
-                    onKeyPress={handleKeyPress}
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    className="amount-input"
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group full-width">
-                  <label htmlFor="description">Description (optional):</label>
-                  <input
-                    id="description"
-                    type="text"
-                    value={title ?? ""}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="e.g., Payment for dinner, Rent share"
-                    className="description-input"
-                  />
-                </div>
-              </div>
-
+            <div className={styles["add-return-form"]}>
               <button
-                onClick={handleAddReturn}
-                className="add-return-button"
-                disabled={
-                  !fromFriendId ||
-                  !toFriendId ||
-                  !amount ||
-                  fromFriendId === toFriendId
-                }
+                onClick={() => props.onNavigate("add-return")}
+                className={styles["add-return-button"]}
               >
                 Record Return
               </button>
             </div>
 
             {moneyReturns.length > 0 ? (
-              <div className="returns-list">
-                <h3>Return History</h3>
+              <div className={styles["returns-list"]}>
                 {moneyReturns.map((moneyReturn) => (
-                  <div key={moneyReturn.id} className="return-card">
-                    <div className="return-header">
-                      <div className="return-people">
-                        <span className="from-person">
+                  <div key={moneyReturn.id} className={styles["return-card"]}>
+                    <div className={styles["return-header"]}>
+                      {moneyReturn.title && (
+                        <div className={styles["return-description"]}>
+                          {moneyReturn.title}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles["return-header"]}>
+                      <div className={styles["return-people"]}>
+                        <span className={styles["from-person"]}>
                           {getFriendName(moneyReturn.from_friend_id)}
                         </span>
-                        <span className="arrow">→</span>
-                        <span className="to-person">
+                        <span className={styles["arrow"]}>→</span>
+                        <span className={styles["to-person"]}>
                           {getFriendName(moneyReturn.to_friend_id)}
                         </span>
                       </div>
-                      <div className="return-amount">
+                      <div className={styles["return-amount"]}>
                         {moneyReturn.amount.toFixed(2)} {currency}
                       </div>
-                    </div>
-                    {moneyReturn.title && (
-                      <div className="return-description">
-                        {moneyReturn.title}
-                      </div>
-                    )}
-                    <div className="return-footer">
                       <button
                         onClick={() => handleDelete(moneyReturn.id)}
-                        className="delete-return-button"
+                        className={styles["delete-return-button"]}
                       >
                         Delete
                       </button>
@@ -187,7 +103,7 @@ function MoneyReturns(): React.JSX.Element {
                 ))}
               </div>
             ) : (
-              <div className="empty-state">
+              <div className={styles["empty-state"]}>
                 <p>No money returns recorded yet. Add one above!</p>
               </div>
             )}

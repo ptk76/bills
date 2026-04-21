@@ -10,6 +10,7 @@ import "./App.css";
 import Scan from "./pages/Scan";
 import Groups from "./pages/Groups";
 import Token from "./components/Token";
+import AddReturn from "./pages/AddReturn";
 
 function App(): React.JSX.Element {
   const { queryInProgress } = useAppContext();
@@ -31,7 +32,12 @@ function App(): React.JSX.Element {
         )}
         {menu === "friends" && <div>{<Contact />} </div>}
         {menu === "groups" && <div>{<Groups />} </div>}
-        {menu === "returns" && <div>{<MoneyReturns />} </div>}
+        {menu === "returns" && (
+          <div>{<MoneyReturns onNavigate={(page) => setMenu(page)} />} </div>
+        )}
+        {menu === "add-return" && (
+          <div>{<AddReturn onNavigate={(page) => setMenu(page)} />} </div>
+        )}
         {menu === "stats" && <div>{<Statistics />} </div>}
       </div>
     </div>
