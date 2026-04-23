@@ -1,39 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAppContext } from "../context/AppContext";
 import styles from "./MoneyReturns.module.css";
-import { Page } from "../components/Navigation";
+import { OnNavigate } from "../App";
 
-function MoneyReturns(props: {
-  onNavigate: (page: Page) => void;
-}): React.JSX.Element {
-  const { currency, friends, moneyReturns, addMoneyReturn, deleteMoneyReturn } =
+function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
+  const { currency, friends, moneyReturns, deleteMoneyReturn } =
     useAppContext();
-  const [fromFriendId, setFromFriendId] = useState<number | null>(null);
-  const [toFriendId, setToFriendId] = useState<number | null>(null);
-  const [amount, setAmount] = useState<number | null>(null);
-  const [title, setTitle] = useState<string | null>(null);
-
-  const handleAddReturn = () => {
-    if (
-      !fromFriendId ||
-      !toFriendId ||
-      fromFriendId === toFriendId ||
-      amount === 0 ||
-      amount === null
-    )
-      return;
-
-    addMoneyReturn({
-      from_friend_id: fromFriendId,
-      to_friend_id: toFriendId,
-      amount: amount,
-      title: title ? title.trim() : "Monkey",
-    });
-    setFromFriendId(null);
-    setToFriendId(null);
-    setAmount(null);
-    setTitle(null);
-  };
 
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this money return record?")) {
@@ -77,9 +49,6 @@ function MoneyReturns(props: {
                           {moneyReturn.title}
                         </div>
                       )}
-                    </div>
-
-                    <div className={styles["return-header"]}>
                       <div className={styles["return-people"]}>
                         <span className={styles["from-person"]}>
                           {getFriendName(moneyReturn.from_friend_id)}
@@ -89,16 +58,17 @@ function MoneyReturns(props: {
                           {getFriendName(moneyReturn.to_friend_id)}
                         </span>
                       </div>
-                      <div className={styles["return-amount"]}>
-                        {moneyReturn.amount.toFixed(2)} {currency}
-                      </div>
-                      <button
-                        onClick={() => handleDelete(moneyReturn.id)}
-                        className={styles["delete-return-button"]}
-                      >
-                        Delete
-                      </button>
                     </div>
+
+                    <div className={styles["return-amount"]}>
+                      {moneyReturn.amount.toFixed(2)} {currency}
+                    </div>
+                    <button
+                      onClick={() => handleDelete(moneyReturn.id)}
+                      className={styles["delete-return-button"]}
+                    >
+                      Delete
+                    </button>
                   </div>
                 ))}
               </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Item, useAppContext } from "../context/AppContext";
 import styles from "./Scan.module.css";
 import { splitLineByLastTwo } from "../utils/lexer";
-import { Page } from "../components/Navigation";
+import { OnNavigate } from "../App";
 
 type BillRow = {
   name: string;
@@ -14,7 +14,7 @@ type BillRow = {
   valid: boolean;
 };
 
-function Csv(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
+function Csv(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { createFullBill } = useAppContext();
   const [bill, setBill] = useState<BillRow[]>([]);
   const [editingTitle, setEditingTitle] = useState<boolean>(false);

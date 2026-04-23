@@ -1,9 +1,9 @@
 import React from "react";
 import { Bill, useAppContext } from "../context/AppContext";
 import "./Home.css";
-import { Page } from "../components/Navigation";
+import { OnNavigate } from "../App";
 
-function Home(props: { onNavigate: (page: Page) => void }): React.JSX.Element {
+function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const {
     currency,
     friends,

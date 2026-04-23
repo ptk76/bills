@@ -1,19 +1,8 @@
 import React from "react";
 import "./Navigation.css";
+import { OnNavigate } from "../App";
 
-export type Page =
-  | "home"
-  | "bill"
-  | "friends"
-  | "groups"
-  | "returns"
-  | "stats"
-  | "scan"
-  | "add-return";
-
-function Navigation(props: {
-  onNavigate: (page: Page) => void;
-}): React.JSX.Element {
+function Navigation(props: { onNavigate: OnNavigate }): React.JSX.Element {
   return (
     <div className="navigation">
       <div onClick={() => props.onNavigate("home")}>Bills</div>

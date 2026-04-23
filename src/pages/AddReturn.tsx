@@ -1,16 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import styles from "./AddReturn.module.css";
-import { Page } from "../components/Navigation";
+import { OnNavigate, PageData } from "../App";
 
 function AddReturn(props: {
-  onNavigate: (page: Page) => void;
+  onNavigate: OnNavigate;
+  data: PageData;
 }): React.JSX.Element {
   const { currency, friends, addMoneyReturn } = useAppContext();
   const [fromFriendId, setFromFriendId] = useState<number | null>(null);
   const [toFriendId, setToFriendId] = useState<number | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const [title, setTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (props.data && props.data.addReturn) {
+      setTitle(props.data.addReturn.title);
+      setFromFriendId(props.data.addReturn.from);
+      setToFriendId(props.data.addReturn.to);
+      setAmount(props.data.addReturn.amount);
+    }
+  }, []);
 
   const handleAddReturn = () => {
     if (
@@ -32,7 +42,7 @@ function AddReturn(props: {
     setToFriendId(null);
     setAmount(null);
     setTitle(null);
-    props.onNavigate("returns");
+    props.onNavigate("back");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -42,7 +52,7 @@ function AddReturn(props: {
   };
 
   const onClose = () => {
-    props.onNavigate("returns");
+    props.onNavigate("back");
   };
   return (
     <div className={styles["money-returns-container"]}>

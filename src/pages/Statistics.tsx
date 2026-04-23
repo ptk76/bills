@@ -2,14 +2,17 @@ import React from "react";
 import { Friend, Group, useAppContext } from "../context/AppContext";
 import "./Statistics.css";
 import Calculator, { TotalSpend } from "../utils/calculator";
+import { OnNavigate } from "../App";
 
 interface Debt {
   from: string;
+  fromId: number;
   to: string | null;
+  toId: number | null;
   amount: number;
 }
 
-function Statistics(): React.JSX.Element {
+function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { currency, friends, groups, bills, items, splits, moneyReturns } =
     useAppContext();
 
@@ -48,7 +51,9 @@ function Statistics(): React.JSX.Element {
       if (personTotal > 0) {
         debts.push({
           from: friend.nick,
+          fromId: friend.id,
           to: payer.nick,
+          toId: payer.id,
           amount: personTotal,
         });
       }
@@ -96,15 +101,17 @@ function Statistics(): React.JSX.Element {
 
     const spendNicks: Debt[] = spendIds.map((spend) => ({
       from: idToNick(spend.from) ?? "???",
+      fromId: spend.from,
       to: idToNick(spend.to),
+      toId: spend.to,
       amount: spend.amount,
     }));
 
     return spendNicks;
   };
 
+  const GROUP_OFFSET = 100000;
   const getGroupDebts = (): Debt[] => {
-    const GROUP_OFFSET = 100000;
     const calc = new Calculator(
       bills,
       items,
@@ -165,7 +172,9 @@ function Statistics(): React.JSX.Element {
 
     const spendNicks: Debt[] = spendIds.map((spend) => ({
       from: idToName(spend.from) ?? "???",
+      fromId: spend.from,
       to: idToName(spend.to),
+      toId: spend.to,
       amount: spend.amount,
     }));
 
@@ -182,6 +191,16 @@ function Statistics(): React.JSX.Element {
         0,
       ) > 0,
   );
+
+  const handlePaidOff = (
+    from: number | null,
+    to: number | null,
+    amount: number,
+  ) => {
+    props.onNavigate("add-return", {
+      addReturn: { title: "Debt repayment", from, to, amount },
+    });
+  };
 
   return (
     <div className="statistics-container">
@@ -211,6 +230,22 @@ function Statistics(): React.JSX.Element {
                       <span className="debt-amount">
                         {debt.amount.toFixed(2)} {currency}
                       </span>
+                      {debt.to !== null && (
+                        <button
+                          onClick={() =>
+                            handlePaidOff(
+                              debt.fromId >= GROUP_OFFSET ? null : debt.fromId,
+                              debt.toId && debt.toId >= GROUP_OFFSET
+                                ? null
+                                : debt.toId,
+                              debt.amount,
+                            )
+                          }
+                          className="paid_off"
+                        >
+                          Paid off
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -236,6 +271,16 @@ function Statistics(): React.JSX.Element {
                       <span className="debt-amount">
                         {debt.amount.toFixed(2)} {currency}
                       </span>
+                      {debt.to !== null && (
+                        <button
+                          onClick={() =>
+                            handlePaidOff(debt.fromId, debt.toId, debt.amount)
+                          }
+                          className="paid_off"
+                        >
+                          Paid off
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
