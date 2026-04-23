@@ -1,7 +1,7 @@
 {
   "compatibility_date": "2025-10-08",
   "main": "worker/index.ts",
-  "name": "d1-template",
+  "name": "bills",
   "upload_source_maps": true,
   "d1_databases": [
     {
