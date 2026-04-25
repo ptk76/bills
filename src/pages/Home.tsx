@@ -2,6 +2,8 @@ import React from "react";
 import { Bill, useAppContext } from "../context/AppContext";
 import "./Home.css";
 import { OnNavigate } from "../App";
+import Warning from "../widgets/Warning";
+import { isBillValid } from "../utils/validator";
 
 function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const {
@@ -9,6 +11,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
     friends,
     items,
     bills,
+    splits,
     createBill,
     deleteBill,
     selectBill,
@@ -82,8 +85,9 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
                   onClick={() => handleSelectBill(bill.id)}
                 >
                   <div className="bill-header">
+                    {!isBillValid(bill, items, splits) && <Warning />}
                     <h3>{bill.title}</h3>
-                    <div className="bill-total">
+                    <div className="billTotal">
                       {total.toFixed(2)} {currency}
                     </div>
                   </div>

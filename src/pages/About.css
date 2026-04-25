@@ -98,7 +98,6 @@
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-
 }
 
 .total-price-amount {
@@ -249,6 +248,10 @@
 .item-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+.item-info {
+  display: flex;
 }
 
 .item-info h3 {
@@ -428,7 +431,7 @@
 }
 
 .no-split {
-  opacity: 0.3; 
+  opacity: 0.3;
 }
 
 .checkbox-label {
@@ -440,7 +443,9 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s, border-color 0.3s;
+  transition:
+    background-color 0.3s,
+    border-color 0.3s;
   user-select: none;
 }
 
@@ -471,7 +476,7 @@
   font-weight: bold;
   color: #4caf50;
 }
-.checkbox-hide{
+.checkbox-hide {
   display: none;
 }
 
@@ -530,17 +535,17 @@
   color: #333;
 }
 
-.friend-select:focus{
+.friend-select:focus {
   outline: none;
   border-color: #646cff;
 }
 
 .closeContainer {
-display: flex;
-margin-bottom: 1rem;
+  display: flex;
+  margin-bottom: 1rem;
 }
 
-.close{
+.close {
   background-color: #ddd;
   color: black;
   font-weight: bolder;

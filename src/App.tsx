@@ -19,6 +19,9 @@ export type PageData = {
     to: number | null;
     amount: number;
   };
+  bill?: {
+    id: number;
+  };
 };
 
 export type Page =
@@ -68,8 +71,8 @@ function App(): React.JSX.Element {
         {queryInProgress && <div className="loader"></div>}
       </div>
       <div className="content">
-        {menu === "home" && <div>{<Home onNavigate={navigateTo} />} </div>}
-        {menu === "bill" && <div>{<About onNavigate={navigateTo} />} </div>}
+        {menu === "home" && <Home onNavigate={navigateTo} />}
+        {menu === "bill" && <About onNavigate={navigateTo} data={pageData} />}
         {menu === "scan" && <div>{<Scan onNavigate={navigateTo} />} </div>}
         {menu === "friends" && <div>{<Contact />} </div>}
         {menu === "groups" && <div>{<Groups />} </div>}

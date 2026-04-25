@@ -110,13 +110,15 @@
 }
 
 .bill-breakdown-header {
+  display: flex;
+  align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .bill-breakdown-header h4 {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   color: #333;
   font-size: 1.15rem;
 }
@@ -132,17 +134,13 @@
   font-size: 1.1rem;
   font-weight: bold;
   color: #4caf50;
+  margin-left: 1rem;
 }
 
 .bill-payer {
   font-size: 0.95rem;
   color: #666;
-}
-
-.bill-payer::before {
-  content: "•";
-  margin-right: 0.5rem;
-  color: #999;
+  margin-left: auto;
 }
 
 .no-debts-message,
@@ -190,4 +188,13 @@
 
 .paid_off:active {
   background-color: #aa0000;
+}
+
+.warning {
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
 }

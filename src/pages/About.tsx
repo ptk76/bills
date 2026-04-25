@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Item, useAppContext } from "../context/AppContext";
 import "./About.css";
-import { OnNavigate } from "../App";
+import { OnNavigate, PageData } from "../App";
+import Warning from "../widgets/Warning";
+import { areItemsValid, isItemValid } from "../utils/validator";
 
-function About(props: { onNavigate: OnNavigate }): React.JSX.Element {
+function About(props: {
+  onNavigate: OnNavigate;
+  data: PageData;
+}): React.JSX.Element {
   const {
     currentBillId,
+    selectBill,
     currency,
     friends,
     splits,
@@ -30,6 +36,13 @@ function About(props: { onNavigate: OnNavigate }): React.JSX.Element {
     title === "Monkey" ? true : false,
   );
   const [tempTitle, setTempTitle] = useState<string>("");
+
+  useEffect(() => {
+    if (props.data && props.data.bill) {
+      selectBill(props.data.bill.id);
+    }
+  }, []);
+
   const handleAddItem = () => {
     if (itemName.trim() !== "" && itemPrice.trim() !== "") {
       const price = parseFloat(itemPrice);
@@ -211,6 +224,9 @@ function About(props: { onNavigate: OnNavigate }): React.JSX.Element {
             </div>
           ) : (
             <div className="title-view-mode">
+              {(!paidBy || !areItemsValid(currentBillId, items, splits)) && (
+                <Warning />
+              )}
               <h2>{title}</h2>
               <button onClick={startEditingTitle} className="edit-title-button">
                 Edit Title
@@ -377,6 +393,7 @@ function About(props: { onNavigate: OnNavigate }): React.JSX.Element {
                     <>
                       <div className="item-header">
                         <div className="item-info">
+                          {!isItemValid(item, splits) && <Warning />}
                           <h3>{item.title}</h3>
                         </div>
                         <div className="item-actions">

@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  align-items: center;
+  height: 1.5rem;
+  margin: 2px 4px 0 4px;
+}
+
+.icon {
+  color: red;
+  font-size: 1.5rem;
+  font-weight: bold;
+}

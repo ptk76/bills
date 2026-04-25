@@ -3,6 +3,8 @@ import { Friend, Group, useAppContext } from "../context/AppContext";
 import "./Statistics.css";
 import Calculator, { TotalSpend } from "../utils/calculator";
 import { OnNavigate } from "../App";
+import { areBillsValid, isBillValid } from "../utils/validator";
+import Warning from "../widgets/Warning";
 
 interface Debt {
   from: string;
@@ -202,10 +204,23 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     });
   };
 
+  const handleWarning = (billId: number) => {
+    props.onNavigate("bill", {
+      bill: { id: billId },
+    });
+  };
+
   return (
     <div className="statistics-container">
       <div className="statistics-section">
-        <h2>Payment Statistics</h2>
+        <div className="header">
+          {!areBillsValid(bills, items, splits) && (
+            <div className="warning" onClick={() => props.onNavigate("home")}>
+              <Warning />
+            </div>
+          )}
+          <h2>Payment Statistics</h2>
+        </div>
 
         {bills.length === 0 ? (
           <div className="empty-state">
@@ -308,17 +323,23 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                     return (
                       <div key={bill.id} className="bill-breakdown-card">
                         <div className="bill-breakdown-header">
+                          {!isBillValid(bill, items, splits) && (
+                            <div
+                              className="warning"
+                              onClick={() => handleWarning(bill.id)}
+                            >
+                              <Warning />
+                            </div>
+                          )}
                           <h4>{bill.title}</h4>
-                          <div className="bill-breakdown-info">
-                            <span className="bill-total">
-                              {billTotal.toFixed(2)} {currency}
+                          {payer && (
+                            <span className="bill-payer">
+                              Paid by: <strong>{payer.nick}</strong>
                             </span>
-                            {payer && (
-                              <span className="bill-payer">
-                                Paid by: <strong>{payer.nick}</strong>
-                              </span>
-                            )}
-                          </div>
+                          )}
+                          <span className="bill-total">
+                            {billTotal.toFixed(2)} {currency}
+                          </span>
                         </div>
                         {billDebts.length > 0 ? (
                           <div className="debts-list">

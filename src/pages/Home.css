@@ -102,8 +102,8 @@
 
 .bill-header {
   display: flex;
-  justify-content: space-between;
   margin-bottom: 0.5rem;
+  align-items: baseline;
 }
 
 .bill-header h3 {
@@ -150,10 +150,11 @@
   font-weight: 900 !important;
 }
 
-.bill-total {
-  font-size: 1.75rem;
+.billTotal {
+  font-size: 1.5rem;
   font-weight: bold;
   color: #4caf50;
+  margin-left: auto;
 }
 
 .delete-bill-button {
