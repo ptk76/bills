@@ -223,25 +223,23 @@ function About(): React.JSX.Element {
         {friends.length > 0 && (
           <div className="names-summary-section">
             <h3>Paid by:</h3>
-            <div className="names-summary-list">
-              <div className="form-group">
-                <select
-                  id="from-friend"
-                  value={paidBy ?? undefined}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    updatePaidBy(isNaN(val) ? null : val);
-                  }}
-                  className="friend-select"
-                >
-                  <option value="null">None</option>
-                  {friends.map((friend) => (
-                    <option key={friend.id} value={friend.id}>
-                      {friend.nick}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="form-group">
+              <select
+                id="from-friend"
+                value={paidBy ?? undefined}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  updatePaidBy(isNaN(val) ? null : val);
+                }}
+                className="friend-select"
+              >
+                <option value="null">None</option>
+                {friends.map((friend) => (
+                  <option key={friend.id} value={friend.id}>
+                    {friend.nick}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         )}
