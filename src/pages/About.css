@@ -534,3 +534,19 @@
   outline: none;
   border-color: #646cff;
 }
+
+.closeContainer {
+display: flex;
+margin-bottom: 1rem;
+}
+
+.close{
+  background-color: #ddd;
+  color: black;
+  font-weight: bolder;
+  font-size: 1.5rem;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-left: auto;
+  cursor: pointer;
+}

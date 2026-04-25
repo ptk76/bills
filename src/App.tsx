@@ -69,7 +69,7 @@ function App(): React.JSX.Element {
       </div>
       <div className="content">
         {menu === "home" && <div>{<Home onNavigate={navigateTo} />} </div>}
-        {menu === "bill" && <div>{<About />} </div>}
+        {menu === "bill" && <div>{<About onNavigate={navigateTo} />} </div>}
         {menu === "scan" && <div>{<Scan onNavigate={navigateTo} />} </div>}
         {menu === "friends" && <div>{<Contact />} </div>}
         {menu === "groups" && <div>{<Groups />} </div>}

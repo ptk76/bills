@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Item, useAppContext } from "../context/AppContext";
 import "./About.css";
+import { OnNavigate } from "../App";
 
-function About(): React.JSX.Element {
+function About(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const {
     currentBillId,
     currency,
@@ -176,9 +177,18 @@ function About(): React.JSX.Element {
     );
   };
 
+  const onClose = () => {
+    props.onNavigate("back");
+  };
+
   return (
     <div className="about-container">
       <div className="items-section">
+        <div className="closeContainer">
+          <div className="close" onClick={onClose}>
+            ↩
+          </div>
+        </div>
         <div className="title-header">
           {editingTitle ? (
             <div className="title-edit-mode">
