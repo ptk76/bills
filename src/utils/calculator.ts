@@ -138,11 +138,11 @@ class Calculator {
         }
 
         const balance = amount - toFromAmount;
-        if (balance > 0) {
+        if (balance >= 0.005) {
           addDebt(from, to, balance);
         }
-        // balance === 0 is ignored
-        // balance < 0 will be/was balanced in balance > 0
+        // balance in range <0, 0.005) is ignored
+        // balance < 0 will be/was balanced in "balance > 0.005"
       });
     });
     return balancedDebts;
