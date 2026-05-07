@@ -36,6 +36,7 @@ export interface Bill {
   title: string;
   token: string;
   paid_by: number | null;
+  currency: string | null;
 }
 
 export interface MoneyReturn {
@@ -44,11 +45,13 @@ export interface MoneyReturn {
   to_friend_id: number;
   title: string;
   amount: number;
+  currency: string | null;
 }
 
 interface AppContextType {
   token: string;
-  currency: string;
+  currency: string | null;
+  updateCurrency: (currency: string) => void;
   queryInProgress: boolean;
   bills: Bill[];
   currentBillId: number | null;
@@ -101,7 +104,6 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   children,
   token,
 }) => {
-  const [currency, setCurrency] = useState("");
   const [queryInProgress, setQueryInProgress] = useState<boolean>(true);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -134,6 +136,16 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   const currentBill = bills.find((b) => b.id === currentBillId) || null;
   const title = currentBill?.title || "Monkey";
   const paidBy = currentBill?.paid_by || null;
+  const currency = currentBill?.currency || null;
+
+  const updateCurrency = async (currency: string) => {
+    setQueryInProgress(true);
+    await queryDatabase(
+      `/bills?id=${currentBillId}&cmd=upd&currency=${currency}`,
+    );
+    setBills((await queryDatabase(`/bills?token=${token}`)) as Bill[]);
+    setQueryInProgress(false);
+  };
 
   const createBill = async (billTitle: string) => {
     setQueryInProgress(true);
@@ -389,6 +401,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
       value={{
         token,
         currency,
+        updateCurrency,
         queryInProgress,
         bills,
         currentBillId,

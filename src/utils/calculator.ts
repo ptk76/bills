@@ -11,6 +11,7 @@ export type TotalSpend = {
   from: number;
   to: number | null;
   amount: number;
+  currency: string | null;
 };
 
 export type MatrixSpends = Map<number, Map<number | null, number>>;
@@ -72,6 +73,7 @@ class Calculator {
       from: friend_id,
       to: bill.paid_by,
       amount: this.getPersonBillSpend(bill.id, friend_id),
+      currency: bill.currency,
     }));
     return totalSpends;
   }

@@ -67,11 +67,13 @@ function bills(params: URLSearchParams) {
     if (id === undefined) return null;
     const title = params.get("title");
     const paid_by = getNumber(params, "paid_by");
-    if (!title && paid_by === undefined) return null;
+    const currency = params.get("currency");
 
     const columns: string[] = [];
     if (title) columns.push(`title="${title}"`);
+    if (currency) columns.push(`currency="${currency}"`);
     if (paid_by !== undefined) columns.push(`paid_by=${paid_by}`);
+    if (columns.length === 0) return null;
 
     return `UPDATE bills SET ${columns.join(",")} WHERE bills.id = ${id};`;
   }

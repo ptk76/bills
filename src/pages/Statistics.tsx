@@ -5,6 +5,7 @@ import Calculator, { TotalSpend } from "../utils/calculator";
 import { OnNavigate } from "../App";
 import { areBillsValid, isBillValid } from "../utils/validator";
 import Warning from "../widgets/Warning";
+import Currency from "../widgets/Currency";
 
 interface Debt {
   from: string;
@@ -12,6 +13,7 @@ interface Debt {
   to: string | null;
   toId: number | null;
   amount: number;
+  currency: string | null;
 }
 
 function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
@@ -57,6 +59,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
           to: payer.nick,
           toId: payer.id,
           amount: personTotal,
+          currency: bill.currency,
         });
       }
     });
@@ -80,6 +83,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
         from: moneyReturn.to_friend_id,
         to: moneyReturn.from_friend_id,
         amount: moneyReturn.amount,
+        currency: moneyReturn.currency,
       });
     });
     const aggregatedDebts = calc.aggregateDebts(total);
@@ -89,7 +93,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
 
     balancedDebts.forEach((value, from) => {
       value.forEach((amount, to) => {
-        spendIds.push({ from, to, amount });
+        spendIds.push({ from, to, amount, currency: "XXX" });
       });
     });
 
@@ -107,6 +111,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       to: idToNick(spend.to),
       toId: spend.to,
       amount: spend.amount,
+      currency: spend.currency,
     }));
 
     return spendNicks;
@@ -129,6 +134,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
         from: moneyReturn.to_friend_id,
         to: moneyReturn.from_friend_id,
         amount: moneyReturn.amount,
+        currency: moneyReturn.currency,
       });
     });
 
@@ -147,6 +153,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       from: friendToGroup(debt.from)!,
       to: friendToGroup(debt.to),
       amount: debt.amount,
+      currency: debt.currency,
     }));
 
     const aggregatedDebts = calc.aggregateDebts(groupTotal);
@@ -156,7 +163,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
 
     balancedDebts.forEach((value, from) => {
       value.forEach((amount, to) => {
-        spendIds.push({ from, to, amount });
+        spendIds.push({ from, to, amount, currency: "XXX" });
       });
     });
 
@@ -178,6 +185,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       to: idToName(spend.to),
       toId: spend.to,
       amount: spend.amount,
+      currency: spend.currency,
     }));
 
     return spendNicks;
@@ -243,7 +251,10 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                         )}
                       </div>
                       <span className="debt-amount">
-                        {debt.amount.toFixed(2)} {currency}
+                        <Currency
+                          currency={debt.currency}
+                          amount={debt.amount}
+                        />
                       </span>
                       {debt.to !== null && (
                         <button
@@ -284,7 +295,10 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                         )}
                       </div>
                       <span className="debt-amount">
-                        {debt.amount.toFixed(2)} {currency}
+                        <Currency
+                          currency={debt.currency}
+                          amount={debt.amount}
+                        />
                       </span>
                       {debt.to !== null && (
                         <button
@@ -338,7 +352,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                             </span>
                           )}
                           <span className="bill-total">
-                            {billTotal.toFixed(2)} {currency}
+                            <Currency currency={"YYY"} amount={billTotal} />
                           </span>
                         </div>
                         {billDebts.length > 0 ? (
@@ -351,7 +365,10 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                                   <span className="debt-to">{debt.to}</span>
                                 </div>
                                 <span className="debt-amount">
-                                  {debt.amount.toFixed(2)} {currency}
+                                  <Currency
+                                    currency={debt.currency}
+                                    amount={debt.amount}
+                                  />
                                 </span>
                               </div>
                             ))}
