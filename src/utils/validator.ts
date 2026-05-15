@@ -5,7 +5,6 @@ export function isItemValid(item: Item, splits: Split[]) {
     (total, split) => total + (split.item_id === item.id ? split.quantity : 0),
     0,
   );
-  console.log("ITEM:", item.title, splitQuantity, splitQuantity > 0);
   return splitQuantity > 0;
 }
 

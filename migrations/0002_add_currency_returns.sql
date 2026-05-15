@@ -1,0 +1,1 @@
+ ALTER TABLE returns ADD COLUMN currency TEXT;

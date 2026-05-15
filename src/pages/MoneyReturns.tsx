@@ -2,6 +2,7 @@ import React from "react";
 import { useAppContext } from "../context/AppContext";
 import styles from "./MoneyReturns.module.css";
 import { OnNavigate } from "../App";
+import Currency from "../widgets/Currency";
 
 function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { currency, friends, moneyReturns, deleteMoneyReturn } =
@@ -61,7 +62,10 @@ function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
                     </div>
 
                     <div className={styles["return-amount"]}>
-                      {moneyReturn.amount.toFixed(2)} {currency}
+                      <Currency
+                        currency={moneyReturn.currency}
+                        amount={moneyReturn.amount}
+                      />
                     </div>
                     <button
                       onClick={() => handleDelete(moneyReturn.id)}

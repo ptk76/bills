@@ -4,18 +4,11 @@ import "./Home.css";
 import { OnNavigate } from "../App";
 import Warning from "../widgets/Warning";
 import { isBillValid } from "../utils/validator";
+import Currency from "../widgets/Currency";
 
 function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
-  const {
-    currency,
-    friends,
-    items,
-    bills,
-    splits,
-    createBill,
-    deleteBill,
-    selectBill,
-  } = useAppContext();
+  const { friends, items, bills, splits, createBill, deleteBill, selectBill } =
+    useAppContext();
 
   const handleCreateBill = async () => {
     const billId = await createBill("Monkey");
@@ -88,7 +81,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
                     {!isBillValid(bill, items, splits) && <Warning />}
                     <h3>{bill.title}</h3>
                     <div className="billTotal">
-                      {total.toFixed(2)} {currency}
+                      <Currency currency={bill.currency} amount={total} />
                     </div>
                   </div>
                   <div className="bill-info">

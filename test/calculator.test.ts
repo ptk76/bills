@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import Calculator, { MatrixSpends } from "../src/utils/calculator";
+import Calculator, { Debt } from "../src/utils/calculator";
 import {
   Bill,
   Friend,
@@ -8,6 +8,8 @@ import {
   MoneyReturn,
   Split,
 } from "../src/context/AppContext";
+
+import realData from "./total.json";
 
 // ── fixtures ──────────────────────────────────────────────────────────────────
 
@@ -20,8 +22,8 @@ const FRIENDS: Friend[] = [
 const GROUPS: Group[] = [];
 
 const BILLS: Bill[] = [
-  { id: 10, title: "Dinner", token: "t1", paid_by: 1 },
-  { id: 20, title: "Lunch", token: "t2", paid_by: 2 },
+  { id: 10, title: "Dinner", token: "t1", paid_by: 1, currency: "PLN" },
+  { id: 20, title: "Lunch", token: "t2", paid_by: 2, currency: "PLN" },
 ];
 
 // item 100: price=30, quantity=1  (bill 10)
@@ -213,57 +215,67 @@ describe("getTotalSpend", () => {
 describe("aggregateDebts", () => {
   it("returns an empty map for empty input", () => {
     const ab = makeCalculator();
-    expect(ab.aggregateDebts([])).toEqual(new Map());
+    expect(ab.aggregateDebts([])).toEqual([]);
   });
 
   it("filters out zero-amount entries", () => {
     const ab = makeCalculator();
-    const result = ab.aggregateDebts([{ from: 1, to: 2, amount: 0 }]);
-    expect(result.size).toBe(0);
+    const result = ab.clearData([
+      { from: 1, to: 2, amount: 0, currency: "PLN" },
+    ]);
+    expect(result).toEqual([]);
   });
 
   it("filters out self-debts (from === to)", () => {
     const ab = makeCalculator();
-    const result = ab.aggregateDebts([{ from: 1, to: 1, amount: 50 }]);
-    expect(result.size).toBe(0);
+    const result = ab.clearData([
+      { from: 1, to: 1, amount: 50, currency: "PLN" },
+    ]);
+    expect(result).toEqual([]);
   });
 
   it("aggregates multiple spends from the same person to the same payer", () => {
     const ab = makeCalculator();
     const result = ab.aggregateDebts([
-      { from: 3, to: 2, amount: 10 },
-      { from: 3, to: 2, amount: 20 },
+      { from: 3, to: 2, amount: 10, currency: "PLN" },
+      { from: 3, to: 2, amount: 20, currency: "PLN" },
     ]);
-    expect(result.get(3)?.get(2)).toBeCloseTo(30);
+    expect(result).toEqual([{ from: 3, to: 2, amount: 30, currency: "PLN" }]);
   });
 
   it("keeps separate entries for different payers", () => {
     const ab = makeCalculator();
     const result = ab.aggregateDebts([
-      { from: 3, to: 1, amount: 20 },
-      { from: 3, to: 2, amount: 30 },
+      { from: 3, to: 1, amount: 20, currency: "PLN" },
+      { from: 3, to: 2, amount: 30, currency: "PLN" },
     ]);
-    expect(result.get(3)?.get(1)).toBeCloseTo(20);
-    expect(result.get(3)?.get(2)).toBeCloseTo(30);
+    expect(result).toEqual([
+      { from: 3, to: 1, amount: 20, currency: "PLN" },
+      { from: 3, to: 2, amount: 30, currency: "PLN" },
+    ]);
   });
 
   it("handles null payer (nobody paid)", () => {
     const ab = makeCalculator();
-    const result = ab.aggregateDebts([{ from: 1, to: null, amount: 25 }]);
-    expect(result.get(1)?.get(null)).toBeCloseTo(25);
+    const result = ab.aggregateDebts([
+      { from: 1, to: null, amount: 25, currency: "PLN" },
+    ]);
+    expect(result).toEqual([
+      { from: 1, to: null, amount: 25, currency: "PLN" },
+    ]);
   });
 
   it("produces correct totals from full spend data", () => {
     const ab = makeCalculator();
     const spends = ab.getTotalSpend();
-    const matrix = ab.aggregateDebts(spends);
+    const cleanSpends = ab.clearData(spends);
+    const result = ab.aggregateDebts(cleanSpends);
 
-    // Alice (1) paid bill 10; Bob/Carol owe her from bill 10.
-    // Bob (2) paid bill 20; Alice/Carol owe him from bill 20.
-    // Alice owes Bob 0 (her bill 20 share = 0).
-    // Carol owes Alice 20 (bill 10) and Bob 30 (bill 20).
-    expect(matrix.get(3)?.get(1)).toBeCloseTo(20);
-    expect(matrix.get(3)?.get(2)).toBeCloseTo(30);
+    expect(result).toEqual([
+      { from: 2, to: 1, amount: 25, currency: "PLN" },
+      { from: 3, to: 1, amount: 20, currency: "PLN" },
+      { from: 3, to: 2, amount: 30, currency: "PLN" },
+    ]);
   });
 });
 
@@ -272,122 +284,102 @@ describe("aggregateDebts", () => {
 describe("balanceDebts", () => {
   it("returns an empty map for an empty matrix", () => {
     const ab = makeCalculator();
-    expect(ab.balanceDebts(new Map())).toEqual(new Map());
+    expect(ab.balanceDebts([])).toEqual([]);
   });
 
   it("handle properly non-spender", () => {
     // 1 spent no single penny
     const ab = makeCalculator();
-    const matrix = new Map([[3, new Map<number | null, number>([[1, 20]])]]);
+    const matrix: Debt[] = [{ from: 3, to: 1, amount: 20, currency: "PLN" }];
     const result = ab.balanceDebts(matrix);
     expect(result).toEqual(matrix);
   });
 
   it("equal opposing debts: 0 outcome", () => {
     const ab = makeCalculator();
-    const matrix = new Map([
-      [1, new Map<number | null, number>([[2, 50]])],
-      [2, new Map<number | null, number>([[1, 50]])],
-    ]);
+    const matrix: Debt[] = [
+      { from: 1, to: 2, amount: 50, currency: "PLN" },
+      { from: 2, to: 1, amount: 50, currency: "PLN" },
+    ];
     const result = ab.balanceDebts(matrix);
-    expect(result.size).toBe(0);
+    expect(result).toEqual([]);
   });
 
   it("nets off unequal opposing debts, leaving the larger side", () => {
     const ab = makeCalculator();
     // Bob owes Alice 80, Alice owes Bob 30 → net: Bob owes Alice 50
-    const matrix = new Map([
-      [2, new Map<number | null, number>([[1, 80]])],
-      [1, new Map<number | null, number>([[2, 30]])],
-    ]);
+    const matrix: Debt[] = [
+      { from: 2, to: 1, amount: 80, currency: "PLN" },
+      { from: 1, to: 2, amount: 30, currency: "PLN" },
+    ];
     const result = ab.balanceDebts(matrix);
-    expect(result.get(2)?.get(1)).toBe(50);
+    expect(result).toEqual([{ from: 2, to: 1, amount: 50, currency: "PLN" }]);
   });
 
   it("keeps a null-payer debt unchanged", () => {
     const ab = makeCalculator();
-    const matrix = new Map([[1, new Map<number | null, number>([[null, 25]])]]);
+    const matrix: Debt[] = [{ from: 1, to: null, amount: 25, currency: "PLN" }];
     const result = ab.balanceDebts(matrix);
-    expect(result.get(1)?.get(null)).toBeCloseTo(25);
+    expect(result).toEqual([
+      { from: 1, to: null, amount: 25, currency: "PLN" },
+    ]);
   });
 
-  it.only("big test", () => {
+  it("big test", () => {
     const ab = makeCalculator();
-    const matrix: MatrixSpends = new Map([
-      [
-        1,
-        new Map<number | null, number>([
-          [3, 25],
-          [4, 21],
-        ]),
-      ],
-      [
-        2,
-        new Map<number | null, number>([
-          [1, 45],
-          [3, 30],
-          [4, 21],
-        ]),
-      ],
-      [
-        3,
-        new Map<number | null, number>([
-          [1, 20],
-          [4, 21],
-          [null, 12],
-        ]),
-      ],
-      [
-        4,
-        new Map<number | null, number>([
-          [1, 20],
-          [3, 30],
-          [null, 12],
-        ]),
-      ],
-      [
-        5,
-        new Map<number | null, number>([
-          [1, 31],
-          [3, 25],
-          [4, 21],
-        ]),
-      ],
-    ]);
-    const expectedMatrix: MatrixSpends = new Map([
-      [
-        1,
-        new Map<number | null, number>([
-          [3, 5],
-          [4, 1],
-        ]),
-      ],
-      [
-        2,
-        new Map<number | null, number>([
-          [1, 45],
-          [3, 30],
-          [4, 21],
-        ]),
-      ],
-      [3, new Map<number | null, number>([[null, 12]])],
-      [
-        4,
-        new Map<number | null, number>([
-          [3, 9],
-          [null, 12],
-        ]),
-      ],
-      [
-        5,
-        new Map<number | null, number>([
-          [1, 31],
-          [3, 25],
-          [4, 21],
-        ]),
-      ],
-    ]);
+    const matrix: Debt[] = [
+      { from: 1, to: 3, amount: 25, currency: "PLN" },
+      { from: 1, to: 4, amount: 21, currency: "PLN" },
+      { from: 2, to: 1, amount: 45, currency: "PLN" },
+      { from: 2, to: 3, amount: 30, currency: "PLN" },
+      { from: 2, to: 4, amount: 21, currency: "PLN" },
+      { from: 3, to: 1, amount: 20, currency: "PLN" },
+      { from: 3, to: 4, amount: 21, currency: "PLN" },
+      { from: 3, to: null, amount: 12, currency: "PLN" },
+      { from: 4, to: 1, amount: 20, currency: "PLN" },
+      { from: 4, to: 3, amount: 30, currency: "PLN" },
+      { from: 4, to: null, amount: 12, currency: "PLN" },
+      { from: 5, to: 1, amount: 31, currency: "PLN" },
+      { from: 5, to: 3, amount: 25, currency: "PLN" },
+      { from: 5, to: 4, amount: 21, currency: "PLN" },
+    ];
+    const expectedMatrix: Debt[] = [
+      { from: 1, to: 3, amount: 5, currency: "PLN" },
+      { from: 1, to: 4, amount: 1, currency: "PLN" },
+      { from: 2, to: 1, amount: 45, currency: "PLN" },
+      { from: 2, to: 3, amount: 30, currency: "PLN" },
+      { from: 2, to: 4, amount: 21, currency: "PLN" },
+      { from: 3, to: null, amount: 12, currency: "PLN" },
+      { from: 4, to: 3, amount: 9, currency: "PLN" },
+      { from: 4, to: null, amount: 12, currency: "PLN" },
+      { from: 5, to: 1, amount: 31, currency: "PLN" },
+      { from: 5, to: 3, amount: 25, currency: "PLN" },
+      { from: 5, to: 4, amount: 21, currency: "PLN" },
+    ];
     const result = ab.balanceDebts(matrix);
     expect(result).toEqual(expectedMatrix);
+  });
+
+  describe("real case", () => {
+    it("clear", () => {
+      const ab = makeCalculator();
+      const clearData = ab.clearData(realData.input);
+      expect(clearData).toEqual(realData.clean);
+    });
+
+    it("aggregate", () => {
+      const ab = makeCalculator();
+      const clearData = ab.clearData(realData.input);
+      const aggregatedDebts = ab.aggregateDebts(clearData);
+      expect(aggregatedDebts).toEqual(realData.aggregated);
+    });
+
+    it("balanced", () => {
+      const ab = makeCalculator();
+      const clearData = ab.clearData(realData.input);
+      const aggrDebts = ab.aggregateDebts(clearData);
+      const balancedDebts = ab.balanceDebts(aggrDebts);
+      expect(balancedDebts).toEqual(realData.output);
+    });
   });
 });

@@ -7,13 +7,12 @@ import {
   Split,
 } from "../context/AppContext";
 
-export type TotalSpend = {
+export type Debt = {
   from: number;
   to: number | null;
   amount: number;
+  currency: string | null;
 };
-
-export type MatrixSpends = Map<number, Map<number | null, number>>;
 
 class Calculator {
   constructor(
@@ -67,17 +66,18 @@ class Calculator {
     );
   }
 
-  public getPersonTotalSpend(friend_id: number): TotalSpend[] {
-    const totalSpends: TotalSpend[] = this.bills.map((bill) => ({
+  public getPersonTotalSpend(friend_id: number): Debt[] {
+    const totalSpends: Debt[] = this.bills.map((bill) => ({
       from: friend_id,
       to: bill.paid_by,
       amount: this.getPersonBillSpend(bill.id, friend_id),
+      currency: bill.currency,
     }));
     return totalSpends;
   }
 
-  public getTotalSpend(): TotalSpend[] {
-    const totalSpends: TotalSpend[] = [];
+  public getTotalSpend(): Debt[] {
+    const totalSpends: Debt[] = [];
 
     this.friends.forEach((friend) => {
       totalSpends.push(...this.getPersonTotalSpend(friend.id));
@@ -85,67 +85,138 @@ class Calculator {
     return totalSpends;
   }
 
-  public aggregateDebts(spends: TotalSpend[]) {
-    const filteredSpends = spends.filter(
-      (spend) => spend.amount !== 0 && spend.from !== spend.to,
-    );
-    const spendMatrix: MatrixSpends = new Map();
+  public clearData(data: Debt[]) {
+    return data.filter((d) => d.from !== d.to && d.amount !== 0);
+  }
 
-    filteredSpends.forEach((spend) => {
-      const from = spendMatrix.get(spend.from);
+  private debtMatrixToDebts = (matrix: Debt3D) => {
+    const debts: Debt[] = [];
 
-      if (from) {
-        const amount = from.get(spend.to);
-        if (amount === undefined) {
-          from.set(spend.to, spend.amount);
-        } else {
-          from.set(spend.to, amount + spend.amount);
-        }
+    matrix.iterate((debt) => debts.push(debt));
+    return debts;
+  };
+
+  public aggregateDebts(debts: Debt[]) {
+    const debtMatrix = new Debt3D([]);
+
+    debts.forEach((debt) => {
+      if (debtMatrix.exists(debt)) {
+        debtMatrix.update(debt);
       } else {
-        spendMatrix.set(spend.from, new Map([[spend.to, spend.amount]]));
+        debtMatrix.add(debt);
       }
     });
 
-    return spendMatrix;
+    return this.debtMatrixToDebts(debtMatrix);
   }
 
-  public balanceDebts(spends: MatrixSpends) {
-    const balancedDebts: MatrixSpends = new Map();
+  public balanceDebts(debts: Debt[]) {
+    const debtMatrix = new Debt3D(debts);
 
-    const addDebt = (from: number, to: number | null, amount: number) => {
-      const isFrom = balancedDebts.get(from);
-      if (isFrom) isFrom.set(to, amount);
-      else balancedDebts.set(from, new Map([[to, amount]]));
-    };
+    const bDebts: Debt[] = [];
+    debtMatrix.iterate((debt) => {
+      if (debt.to === null) {
+        bDebts.push(debt);
+        return;
+      }
 
-    spends.forEach((value, from) => {
-      value.forEach((amount, to) => {
-        if (to == null) {
-          addDebt(from, null, amount);
-          return;
-        }
-
-        const toDebts = spends.get(to);
-        if (!toDebts) {
-          addDebt(from, to, amount);
-          return;
-        }
-
-        const toFromAmount = toDebts.get(from);
-        if (toFromAmount === undefined) {
-          addDebt(from, to, amount);
-          return;
-        }
-
-        const balance = amount - toFromAmount;
-        if (balance >= 0.005) {
-          addDebt(from, to, balance);
-        }
+      const oppositeAmount = debtMatrix.getAmount(
+        debt.to,
+        debt.from,
+        debt.currency,
+      );
+      if (oppositeAmount === null) {
+        bDebts.push(debt);
+      } else if (debt.amount > oppositeAmount) {
+        const balance = debt.amount - oppositeAmount;
         // balance in range <0, 0.005) is ignored
-        // balance < 0 will be/was balanced in "balance > 0.005"
+        // balance < 0 will be/was balanced in opposite comparison "balance > 0.005"
+        if (balance >= 0.005)
+          bDebts.push({
+            from: debt.from,
+            to: debt.to,
+            currency: debt.currency,
+            amount: debt.amount - oppositeAmount,
+          });
+      } else {
+      }
+    });
+    return bDebts;
+  }
+}
+
+type CurrencyAmount = Map<string | null, number>;
+type ToDebt = Map<number | null, CurrencyAmount>;
+type DebtMatrix = Map<number, ToDebt>;
+
+class Debt3D {
+  private matrix: DebtMatrix = new Map();
+  constructor(debts: Debt[]) {
+    debts.forEach((debt) => {
+      if (this.exists(debt)) {
+        this.update(debt);
+      } else {
+        this.add(debt);
+      }
+    });
+  }
+
+  exists = (debt: Debt) => {
+    const from = this.matrix.get(debt.from);
+    if (from) {
+      const to = from.get(debt.to);
+      if (to) {
+        const amount = to.get(debt.currency);
+        if (amount) return true;
+      }
+    }
+    return false;
+  };
+
+  add(debt: Debt) {
+    const to = this.matrix.get(debt.from) ?? new Map<number, CurrencyAmount>();
+    const currency = to.get(debt.to) ?? new Map<string | null, number>();
+    const amount = currency.has(debt.currency)
+      ? currency.get(debt.currency)!
+      : debt.amount;
+
+    currency.set(debt.currency, amount);
+    to.set(debt.to, currency);
+    this.matrix.set(debt.from, to);
+  }
+
+  update(debt: Debt) {
+    const tos = this.matrix.get(debt.from);
+    if (!tos) return;
+    const currencies = tos.get(debt.to);
+    if (!currencies) return;
+    const existingAmount = currencies.get(debt.currency);
+    if (!existingAmount) return;
+    currencies.set(debt.currency, existingAmount + debt.amount);
+  }
+
+  getAmount(from: number, to: number | null, currency: string | null) {
+    if (this.matrix.has(from)) {
+      const tos = this.matrix.get(from);
+      if (tos) {
+        const currencies = tos.get(to);
+        if (currencies) {
+          const amount = currencies.get(currency);
+          if (amount) return amount;
+        }
+      }
+    }
+    return null;
+  }
+
+  iterate(fn: (debt: Debt) => void) {
+    this.matrix.forEach((tos, from) => {
+      tos.forEach((currencies, to) => {
+        currencies.forEach((amount, currency) => {
+          fn({ from, to, currency, amount });
+        });
       });
     });
-    return balancedDebts;
   }
 }
 

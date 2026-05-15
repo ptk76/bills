@@ -4,6 +4,7 @@ import "./About.css";
 import { OnNavigate, PageData } from "../App";
 import Warning from "../widgets/Warning";
 import { areItemsValid, isItemValid } from "../utils/validator";
+import Currency, { CurrencyDropdown } from "../widgets/Currency";
 
 function About(props: {
   onNavigate: OnNavigate;
@@ -13,6 +14,7 @@ function About(props: {
     currentBillId,
     selectBill,
     currency,
+    updateCurrency,
     friends,
     splits,
     items,
@@ -194,6 +196,10 @@ function About(props: {
     props.onNavigate("back");
   };
 
+  const setCurrency = (currency: string) => {
+    updateCurrency(currency !== "null" ? currency : null);
+  };
+
   return (
     <div className="about-container">
       <div className="items-section">
@@ -240,7 +246,7 @@ function About(props: {
             <div className="total-price-content">
               <span className="total-price-label">Total Price:</span>
               <span className="total-price-amount">
-                {calculateTotalPrice().toFixed(2)} {currency}
+                <Currency currency={currency} amount={calculateTotalPrice()} />
               </span>
             </div>
           </div>
@@ -270,6 +276,13 @@ function About(props: {
           </div>
         )}
 
+        <div className="names-summary-section">
+          <h3>Currency:</h3>
+          <div className="form-group">
+            <CurrencyDropdown currency={currency} onChange={setCurrency} />
+          </div>
+        </div>
+
         {friends.length > 0 && (
           <div className="names-summary-section">
             <h3>People & Totals</h3>
@@ -281,7 +294,7 @@ function About(props: {
                   <div key={friend.id} className={`person-summary-item`}>
                     <span className="person-name">{friend.nick}</span>
                     <span className="person-total">
-                      {total.toFixed(2)} {currency}
+                      <Currency currency={currency} amount={total} />
                     </span>
                   </div>
                 );
@@ -413,11 +426,14 @@ function About(props: {
                       </div>
                       <div className="item-price-container">
                         <p className="item-price">
-                          {item.price.toFixed(2)} {currency}{" "}
+                          <Currency currency={currency} amount={item.price} />
                         </p>
                         <p className="item-quantity">x {item.quantity}</p>
                         <p className="item-price-total">
-                          {(item.price * item.quantity).toFixed(2)} {currency}
+                          <Currency
+                            currency={currency}
+                            amount={item.price * item.quantity}
+                          />
                         </p>
                       </div>
 

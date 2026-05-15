@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import styles from "./AddReturn.module.css";
 import { OnNavigate, PageData } from "../App";
+import { CurrencyDropdown } from "../widgets/Currency";
 
 function AddReturn(props: {
   onNavigate: OnNavigate;
   data: PageData;
 }): React.JSX.Element {
-  const { currency, friends, addMoneyReturn } = useAppContext();
+  const { friends, addMoneyReturn } = useAppContext();
   const [fromFriendId, setFromFriendId] = useState<number | null>(null);
   const [toFriendId, setToFriendId] = useState<number | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
+  const [currency, setCurrency] = useState<string | null>(null);
   const [title, setTitle] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,6 +20,7 @@ function AddReturn(props: {
       setTitle(props.data.addReturn.title);
       setFromFriendId(props.data.addReturn.from);
       setToFriendId(props.data.addReturn.to);
+      setCurrency(props.data.addReturn.currency);
       setAmount(props.data.addReturn.amount);
     }
   }, []);
@@ -37,6 +40,7 @@ function AddReturn(props: {
       to_friend_id: toFriendId,
       amount: amount,
       title: title ? title.trim() : "Monkey",
+      currency: currency,
     });
     setFromFriendId(null);
     setToFriendId(null);
@@ -129,7 +133,7 @@ function AddReturn(props: {
               </div>
 
               <div className={styles["form-group"]}>
-                <label htmlFor="amount">Amount ({currency}):</label>
+                <label htmlFor="amount">Amount:</label>
                 <input
                   id="amount"
                   type="number"
@@ -144,6 +148,10 @@ function AddReturn(props: {
                   step="0.01"
                   className={styles["amount-input"]}
                 />
+              </div>
+              <div className={styles["form-group"]}>
+                <label htmlFor="amount">Currency:</label>
+                <CurrencyDropdown currency={currency} onChange={setCurrency} />
               </div>
             </div>
 

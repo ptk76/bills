@@ -1,0 +1,14 @@
+.option {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+  background-color: white;
+  color: #333;
+}
+
+.option:focus {
+  outline: none;
+  border-color: #646cff;
+}
