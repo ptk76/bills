@@ -1,5 +1,4 @@
 import React from "react";
-import { useAppContext } from "../context/AppContext";
 import style from "./Currency.module.css";
 
 export const regionToCurrency = {
@@ -32,7 +31,6 @@ export const regionToCurrency = {
 type RegionType = keyof typeof regionToCurrency;
 
 function getAmountWithCurrency(amount: number, currency: string | null) {
-  console.log("getAmountWithCurrency:", amount, currency, navigator.language);
   try {
     if (currency)
       return amount.toLocaleString(navigator.language, {
@@ -43,30 +41,27 @@ function getAmountWithCurrency(amount: number, currency: string | null) {
       });
   } catch (e) {}
 
-  if (currency && currency !== "") {
-    console.log("UNKNOWN currency");
-    return (
-      amount.toLocaleString("pl-PL", {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2,
-      }) +
-      " " +
-      currency
-    );
-  }
+  return (
+    amount.toLocaleString(navigator.language, {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    }) +
+    " " +
+    (currency === null ? "" : currency)
+  );
 
-  // Use a region-to-currency map as the source of truth
-  const region = new Intl.Locale(navigator.language).maximize().region;
-  const regionCurrency =
-    region && region in regionToCurrency
-      ? regionToCurrency[region as RegionType]
-      : regionToCurrency.EU;
+  // // Use a region-to-currency map as the source of truth
+  // const region = new Intl.Locale(navigator.language).maximize().region;
+  // const regionCurrency =
+  //   region && region in regionToCurrency
+  //     ? regionToCurrency[region as RegionType]
+  //     : regionToCurrency.EU;
 
-  const tmp = new Intl.NumberFormat(navigator.language, {
-    style: "currency",
-    currency: regionCurrency,
-  });
-  return tmp.format(amount);
+  // const tmp = new Intl.NumberFormat(navigator.language, {
+  //   style: "currency",
+  //   currency: regionCurrency,
+  // });
+  // return tmp.format(amount);
 }
 
 function Currency(props: {
@@ -83,7 +78,6 @@ export function CurrencyDropdown(props: {
   const buildOptions = () => {
     const result = [];
     for (const region in regionToCurrency) {
-      console.log(region);
       result.push(
         <option
           key={region}
@@ -99,7 +93,6 @@ export function CurrencyDropdown(props: {
 
   return (
     <select
-      id="from-friend"
       onChange={(e) => {
         props.onChange(e.target.value);
       }}

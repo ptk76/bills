@@ -51,7 +51,7 @@ export interface MoneyReturn {
 interface AppContextType {
   token: string;
   currency: string | null;
-  updateCurrency: (currency: string) => void;
+  updateCurrency: (currency: string | null) => void;
   queryInProgress: boolean;
   bills: Bill[];
   currentBillId: number | null;
@@ -138,7 +138,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   const paidBy = currentBill?.paid_by || null;
   const currency = currentBill?.currency || null;
 
-  const updateCurrency = async (currency: string) => {
+  const updateCurrency = async (currency: string | null) => {
     setQueryInProgress(true);
     await queryDatabase(
       `/bills?id=${currentBillId}&cmd=upd&currency=${currency}`,
@@ -379,7 +379,7 @@ export const AppProvider: React.FC<{ children: ReactNode; token: string }> = ({
   ) => {
     setQueryInProgress(true);
     await queryDatabase(
-      `/returns?cmd=add&token=${token}&from_friend_id=${moneyReturn.from_friend_id}&to_friend_id=${moneyReturn.to_friend_id}&amount=${moneyReturn.amount}&title=${moneyReturn.title}`,
+      `/returns?cmd=add&token=${token}&from_friend_id=${moneyReturn.from_friend_id}&to_friend_id=${moneyReturn.to_friend_id}&amount=${moneyReturn.amount}&title=${moneyReturn.title}&currency=${moneyReturn.currency}`,
     );
     setMoneyReturns(
       (await queryDatabase(`/returns?token=${token}`)) as MoneyReturn[],

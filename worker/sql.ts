@@ -71,7 +71,8 @@ function bills(params: URLSearchParams) {
 
     const columns: string[] = [];
     if (title) columns.push(`title="${title}"`);
-    if (currency) columns.push(`currency="${currency}"`);
+    if (currency === "null") columns.push(`currency=null`);
+    else if (currency) columns.push(`currency="${currency}"`);
     if (paid_by !== undefined) columns.push(`paid_by=${paid_by}`);
     if (columns.length === 0) return null;
 
@@ -96,6 +97,7 @@ function returns(params: URLSearchParams) {
     const from_friend_id = getNumber(params, "from_friend_id");
     const to_friend_id = getNumber(params, "friend_id");
     const title = params.get("title");
+    const currency = params.get("currency");
     const amount = getNumber(params, "amount");
 
     const columns: string[] = [];
@@ -104,8 +106,10 @@ function returns(params: URLSearchParams) {
     if (to_friend_id !== undefined)
       columns.push(`to_friend_id=${to_friend_id}`);
     if (title !== undefined) columns.push(`title=${title}`);
+    if (currency !== undefined) columns.push(`currency=${currency}`);
     if (amount !== undefined) columns.push(`amount=${amount}`);
 
+    if (columns.length === 0) return null;
     return `UPDATE returns SET ${columns.join(",")} WHERE returns.id = ${id};`;
   }
   const token = params.get("token");
@@ -119,7 +123,9 @@ function returns(params: URLSearchParams) {
     const amount = getNumber(params, "amount");
     if (amount === undefined || amount === 0) return null;
     const title = params.get("title") ?? null;
-    return `INSERT INTO returns (token, from_friend_id, to_friend_id, title, amount) VALUES ("${token}", ${from_friend_id}, ${to_friend_id}, "${title}", ${amount})`;
+    const currency = params.get("currency");
+
+    return `INSERT INTO returns (token, from_friend_id, to_friend_id, title, amount, currency) VALUES ("${token}", ${from_friend_id}, ${to_friend_id}, "${title}", ${amount}, "${currency}")`;
   }
 
   return `SELECT * FROM returns WHERE token="${token}"`;

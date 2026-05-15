@@ -197,7 +197,7 @@ function About(props: {
   };
 
   const setCurrency = (currency: string) => {
-    updateCurrency(currency);
+    updateCurrency(currency !== "null" ? currency : null);
   };
 
   return (

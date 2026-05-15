@@ -1,13 +1,13 @@
 import React from "react";
 import { Friend, Group, useAppContext } from "../context/AppContext";
 import "./Statistics.css";
-import Calculator, { TotalSpend } from "../utils/calculator";
+import Calculator, { Debt } from "../utils/calculator";
 import { OnNavigate } from "../App";
 import { areBillsValid, isBillValid } from "../utils/validator";
 import Warning from "../widgets/Warning";
 import Currency from "../widgets/Currency";
 
-interface Debt {
+interface DebtNicks {
   from: string;
   fromId: number;
   to: string | null;
@@ -17,18 +17,18 @@ interface Debt {
 }
 
 function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
-  const { currency, friends, groups, bills, items, splits, moneyReturns } =
+  const { friends, groups, bills, items, splits, moneyReturns } =
     useAppContext();
 
   // Calculate how much each person owes for a specific bill
-  const calculateBillDebts = (billId: number): Debt[] => {
+  const calculateBillDebts = (billId: number): DebtNicks[] => {
     const bill = bills.find((b) => b.id === billId);
     if (!bill || !bill.paid_by) return [];
 
     const payer = friends.find((f) => f.id === bill.paid_by);
     if (!payer) return [];
 
-    const debts: Debt[] = [];
+    const debts: DebtNicks[] = [];
 
     // Calculate each person's share
     friends.forEach((friend) => {
@@ -67,7 +67,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     return debts;
   };
 
-  const getBalansedDebts = (): Debt[] => {
+  const getBalancedDebts = (): DebtNicks[] => {
     const calc = new Calculator(
       bills,
       items,
@@ -89,13 +89,13 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     const aggregatedDebts = calc.aggregateDebts(total);
     const balancedDebts = calc.balanceDebts(aggregatedDebts);
 
-    const spendIds: TotalSpend[] = [];
+    // const spendIds: TotalSpend[] = [];
 
-    balancedDebts.forEach((value, from) => {
-      value.forEach((amount, to) => {
-        spendIds.push({ from, to, amount, currency: "XXX" });
-      });
-    });
+    // balancedDebts.forEach((value, from) => {
+    //   value.forEach((amount, to) => {
+    //     spendIds.push({ from, to, amount, currency: "XXX" });
+    //   });
+    // });
 
     const idToNick = (friend_id: number | null) => {
       if (friend_id === null) return null;
@@ -105,7 +105,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       return friend.nick;
     };
 
-    const spendNicks: Debt[] = spendIds.map((spend) => ({
+    const spendNicks: DebtNicks[] = balancedDebts.map((spend) => ({
       from: idToNick(spend.from) ?? "???",
       fromId: spend.from,
       to: idToNick(spend.to),
@@ -118,7 +118,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
   };
 
   const GROUP_OFFSET = 100000;
-  const getGroupDebts = (): Debt[] => {
+  const getGroupDebts = (): DebtNicks[] => {
     const calc = new Calculator(
       bills,
       items,
@@ -149,7 +149,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       return Number(friend.group_id) + GROUP_OFFSET;
     };
 
-    const groupTotal: TotalSpend[] = total.map((debt) => ({
+    const groupTotal: Debt[] = total.map((debt) => ({
       from: friendToGroup(debt.from)!,
       to: friendToGroup(debt.to),
       amount: debt.amount,
@@ -159,13 +159,13 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     const aggregatedDebts = calc.aggregateDebts(groupTotal);
     const balancedDebts = calc.balanceDebts(aggregatedDebts);
 
-    const spendIds: TotalSpend[] = [];
+    // const spendIds: TotalSpend[] = [];
 
-    balancedDebts.forEach((value, from) => {
-      value.forEach((amount, to) => {
-        spendIds.push({ from, to, amount, currency: "XXX" });
-      });
-    });
+    // balancedDebts.forEach((value, from) => {
+    //   value.forEach((amount, to) => {
+    //     spendIds.push({ from, to, amount, currency: "XXX" });
+    //   });
+    // });
 
     const idToName = (id: number | null) => {
       if (id === null) return null;
@@ -179,7 +179,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       return "surname" in record ? record.surname : record.nick;
     };
 
-    const spendNicks: Debt[] = spendIds.map((spend) => ({
+    const spendNicks: DebtNicks[] = balancedDebts.map((spend) => ({
       from: idToName(spend.from) ?? "???",
       fromId: spend.from,
       to: idToName(spend.to),
@@ -191,7 +191,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     return spendNicks;
   };
 
-  const balansedDebts = getBalansedDebts();
+  const balancedDebts = getBalancedDebts();
   const groupDebts = getGroupDebts();
   const billsWithDebts = bills.filter(
     (bill) =>
@@ -282,9 +282,9 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
 
             <div className="total-summary-section">
               <h3>Total Debts by Individuals</h3>
-              {balansedDebts.length > 0 ? (
+              {balancedDebts.length > 0 ? (
                 <div className="debts-list">
-                  {balansedDebts.map((debt, index) => (
+                  {balancedDebts.map((debt, index) => (
                     <div key={index} className="debt-item total-debt">
                       <div className="debt-info">
                         <span className="debt-from">{debt.from}</span>
@@ -352,7 +352,10 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                             </span>
                           )}
                           <span className="bill-total">
-                            <Currency currency={"YYY"} amount={billTotal} />
+                            <Currency
+                              currency={bill.currency}
+                              amount={billTotal}
+                            />
                           </span>
                         </div>
                         {billDebts.length > 0 ? (
