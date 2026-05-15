@@ -20,6 +20,7 @@ function AddReturn(props: {
       setTitle(props.data.addReturn.title);
       setFromFriendId(props.data.addReturn.from);
       setToFriendId(props.data.addReturn.to);
+      setCurrency(props.data.addReturn.currency);
       setAmount(props.data.addReturn.amount);
     }
   }, []);

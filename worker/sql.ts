@@ -92,26 +92,7 @@ function returns(params: URLSearchParams) {
     if (id === undefined) return null;
     return `DELETE FROM returns WHERE returns.id = ${id};`;
   }
-  if (params.get("cmd") === "upd") {
-    if (id === undefined) return null;
-    const from_friend_id = getNumber(params, "from_friend_id");
-    const to_friend_id = getNumber(params, "friend_id");
-    const title = params.get("title");
-    const currency = params.get("currency");
-    const amount = getNumber(params, "amount");
 
-    const columns: string[] = [];
-    if (from_friend_id !== undefined)
-      columns.push(`from_friend_id="${from_friend_id}"`);
-    if (to_friend_id !== undefined)
-      columns.push(`to_friend_id=${to_friend_id}`);
-    if (title !== undefined) columns.push(`title=${title}`);
-    if (currency !== undefined) columns.push(`currency=${currency}`);
-    if (amount !== undefined) columns.push(`amount=${amount}`);
-
-    if (columns.length === 0) return null;
-    return `UPDATE returns SET ${columns.join(",")} WHERE returns.id = ${id};`;
-  }
   const token = params.get("token");
   if (!token) return null;
 
@@ -123,9 +104,12 @@ function returns(params: URLSearchParams) {
     const amount = getNumber(params, "amount");
     if (amount === undefined || amount === 0) return null;
     const title = params.get("title") ?? null;
-    const currency = params.get("currency");
+    const currency =
+      params.get("currency") !== "null"
+        ? '"' + params.get("currency") + '"'
+        : null;
 
-    return `INSERT INTO returns (token, from_friend_id, to_friend_id, title, amount, currency) VALUES ("${token}", ${from_friend_id}, ${to_friend_id}, "${title}", ${amount}, "${currency}")`;
+    return `INSERT INTO returns (token, from_friend_id, to_friend_id, title, amount, currency) VALUES ("${token}", ${from_friend_id}, ${to_friend_id}, "${title}", ${amount}, ${currency})`;
   }
 
   return `SELECT * FROM returns WHERE token="${token}"`;

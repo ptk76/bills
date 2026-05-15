@@ -268,10 +268,8 @@ describe("aggregateDebts", () => {
   it("produces correct totals from full spend data", () => {
     const ab = makeCalculator();
     const spends = ab.getTotalSpend();
-    console.log("spends", spends);
     const cleanSpends = ab.clearData(spends);
     const result = ab.aggregateDebts(cleanSpends);
-    console.log("result", result);
 
     expect(result).toEqual([
       { from: 2, to: 1, amount: 25, currency: "PLN" },

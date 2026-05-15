@@ -73,7 +73,7 @@ function Currency(props: {
 
 export function CurrencyDropdown(props: {
   currency: string | null;
-  onChange: (currency: string) => void;
+  onChange: (currency: string | null) => void;
 }): React.JSX.Element {
   const buildOptions = () => {
     const result = [];
@@ -90,11 +90,11 @@ export function CurrencyDropdown(props: {
     }
     return result;
   };
-
   return (
     <select
       onChange={(e) => {
-        props.onChange(e.target.value);
+        const value = e.target.value;
+        props.onChange(value === "null" ? null : value);
       }}
       className={style.option}
     >

@@ -89,14 +89,6 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     const aggregatedDebts = calc.aggregateDebts(total);
     const balancedDebts = calc.balanceDebts(aggregatedDebts);
 
-    // const spendIds: TotalSpend[] = [];
-
-    // balancedDebts.forEach((value, from) => {
-    //   value.forEach((amount, to) => {
-    //     spendIds.push({ from, to, amount, currency: "XXX" });
-    //   });
-    // });
-
     const idToNick = (friend_id: number | null) => {
       if (friend_id === null) return null;
 
@@ -105,14 +97,16 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       return friend.nick;
     };
 
-    const spendNicks: DebtNicks[] = balancedDebts.map((spend) => ({
-      from: idToNick(spend.from) ?? "???",
-      fromId: spend.from,
-      to: idToNick(spend.to),
-      toId: spend.to,
-      amount: spend.amount,
-      currency: spend.currency,
-    }));
+    const spendNicks: DebtNicks[] = calc
+      .clearData(balancedDebts)
+      .map((spend) => ({
+        from: idToNick(spend.from) ?? "???",
+        fromId: spend.from,
+        to: idToNick(spend.to),
+        toId: spend.to,
+        amount: spend.amount,
+        currency: spend.currency,
+      }));
 
     return spendNicks;
   };
@@ -159,14 +153,6 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     const aggregatedDebts = calc.aggregateDebts(groupTotal);
     const balancedDebts = calc.balanceDebts(aggregatedDebts);
 
-    // const spendIds: TotalSpend[] = [];
-
-    // balancedDebts.forEach((value, from) => {
-    //   value.forEach((amount, to) => {
-    //     spendIds.push({ from, to, amount, currency: "XXX" });
-    //   });
-    // });
-
     const idToName = (id: number | null) => {
       if (id === null) return null;
       const record: Group | Friend | undefined =
@@ -179,14 +165,16 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
       return "surname" in record ? record.surname : record.nick;
     };
 
-    const spendNicks: DebtNicks[] = balancedDebts.map((spend) => ({
-      from: idToName(spend.from) ?? "???",
-      fromId: spend.from,
-      to: idToName(spend.to),
-      toId: spend.to,
-      amount: spend.amount,
-      currency: spend.currency,
-    }));
+    const spendNicks: DebtNicks[] = calc
+      .clearData(balancedDebts)
+      .map((spend) => ({
+        from: idToName(spend.from) ?? "???",
+        fromId: spend.from,
+        to: idToName(spend.to),
+        toId: spend.to,
+        amount: spend.amount,
+        currency: spend.currency,
+      }));
 
     return spendNicks;
   };
@@ -205,10 +193,11 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const handlePaidOff = (
     from: number | null,
     to: number | null,
+    currency: string | null,
     amount: number,
   ) => {
     props.onNavigate("add-return", {
-      addReturn: { title: "Debt repayment", from, to, amount },
+      addReturn: { title: "Debt repayment", from, to, currency, amount },
     });
   };
 
@@ -264,12 +253,13 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                               debt.toId && debt.toId >= GROUP_OFFSET
                                 ? null
                                 : debt.toId,
+                              debt.currency,
                               debt.amount,
                             )
                           }
                           className="paid_off"
                         >
-                          Paid off
+                          Pay off
                         </button>
                       )}
                     </div>
@@ -303,11 +293,16 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                       {debt.to !== null && (
                         <button
                           onClick={() =>
-                            handlePaidOff(debt.fromId, debt.toId, debt.amount)
+                            handlePaidOff(
+                              debt.fromId,
+                              debt.toId,
+                              debt.currency,
+                              debt.amount,
+                            )
                           }
                           className="paid_off"
                         >
-                          Paid off
+                          Pay off
                         </button>
                       )}
                     </div>

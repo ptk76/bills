@@ -17,6 +17,7 @@ export type PageData = {
     title: string;
     from: number | null;
     to: number | null;
+    currency: string | null;
     amount: number;
   };
   bill?: {
