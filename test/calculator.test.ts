@@ -277,6 +277,20 @@ describe("aggregateDebts", () => {
       { from: 3, to: 2, amount: 30, currency: "PLN" },
     ]);
   });
+
+  it("handle amount = 0", () => {
+    const ab = makeCalculator();
+    const input = [
+      { from: 19, to: 17, amount: 0, currency: null },
+      { from: 19, to: 18, amount: 0, currency: null },
+      { from: 19, to: 17, amount: 8.333333333333334, currency: null },
+    ];
+    const aggrDebts = ab.aggregateDebts(input);
+    expect(aggrDebts).toEqual([
+      { from: 19, to: 17, currency: null, amount: 8.333333333333334 },
+      { from: 19, to: 18, currency: null, amount: 0 },
+    ]);
+  });
 });
 
 // ── balanceDebts ──────────────────────────────────────────────────────────────

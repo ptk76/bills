@@ -167,7 +167,7 @@ class Debt3D {
       const to = from.get(debt.to);
       if (to) {
         const amount = to.get(debt.currency);
-        if (amount) return true;
+        if (amount !== undefined) return true;
       }
     }
     return false;
@@ -191,7 +191,7 @@ class Debt3D {
     const currencies = tos.get(debt.to);
     if (!currencies) return;
     const existingAmount = currencies.get(debt.currency);
-    if (!existingAmount) return;
+    if (existingAmount === undefined) return;
     currencies.set(debt.currency, existingAmount + debt.amount);
   }
 
