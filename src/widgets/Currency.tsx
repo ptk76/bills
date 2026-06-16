@@ -75,16 +75,32 @@ export function CurrencyDropdown(props: {
   currency: string | null;
   onChange: (currency: string | null) => void;
 }): React.JSX.Element {
+  const getRegionCurrency = () => {
+    // Use a region-to-currency map as the source of truth
+    const region = new Intl.Locale(navigator.language).maximize().region;
+    const regionCurrency =
+      region && region in regionToCurrency
+        ? regionToCurrency[region as RegionType]
+        : null;
+    return regionCurrency;
+  };
+  const getDefault = () => {
+    const savedCurrency = localStorage.getItem("default_currency");
+    if (!savedCurrency) return getRegionCurrency();
+    return savedCurrency;
+  };
+  const setDefault = (currency: string | null) => {
+    if (typeof currency === "string")
+      localStorage.setItem("default_currency", currency);
+  };
   const buildOptions = () => {
     const result = [];
-    for (const region in regionToCurrency) {
+    const currency = props.currency ? props.currency : getDefault();
+    const currencies = Array.from(new Set(Object.values(regionToCurrency)));
+    for (const curr of currencies) {
       result.push(
-        <option
-          key={region}
-          value={regionToCurrency[region as RegionType]}
-          selected={props.currency === regionToCurrency[region as RegionType]}
-        >
-          {regionToCurrency[region as RegionType]}
+        <option key={curr} value={curr} selected={currency === curr}>
+          {curr}
         </option>,
       );
     }
@@ -94,7 +110,9 @@ export function CurrencyDropdown(props: {
     <select
       onChange={(e) => {
         const value = e.target.value;
-        props.onChange(value === "null" ? null : value);
+        const newCurrency = value === "null" ? null : value;
+        setDefault(newCurrency);
+        props.onChange(newCurrency);
       }}
       className={style.option}
     >
