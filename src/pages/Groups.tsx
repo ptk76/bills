@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import styles from "./Groups.module.css";
+import { useT } from "../i18n/I18nContext";
 
 function Groups(): React.JSX.Element {
   const { groups, addGroup, deleteGroup } = useAppContext();
+  const t = useT();
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleAddName = () => {
@@ -12,7 +14,7 @@ function Groups(): React.JSX.Element {
   };
 
   const handleDeleteName = (id: number) => {
-    if (confirm("Are you sure you want to delete this money return record?")) {
+    if (confirm(t("groups.confirmDelete"))) {
       deleteGroup(id);
     }
   };
@@ -26,7 +28,7 @@ function Groups(): React.JSX.Element {
   return (
     <div className={styles.container}>
       <div className={styles["name-list-section"]}>
-        <h2>Tribes</h2>
+        <h2>{t("groups.title")}</h2>
 
         <div className={styles["add-name-form"]}>
           <input
@@ -34,11 +36,11 @@ function Groups(): React.JSX.Element {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Enter a name"
+            placeholder={t("groups.enterName")}
             className={styles["name-input"]}
           />
           <button onClick={handleAddName} className={styles["add-button"]}>
-            Add Tribe
+            {t("groups.addTribe")}
           </button>
         </div>
 
@@ -51,15 +53,13 @@ function Groups(): React.JSX.Element {
                   onClick={() => handleDeleteName(grp.id)}
                   className={styles["delete-button"]}
                 >
-                  Delete
+                  {t("common.delete")}
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p className={styles["empty-message"]}>
-            No names added yet. Add your first contact above!
-          </p>
+          <p className={styles["empty-message"]}>{t("groups.empty")}</p>
         )}
       </div>
     </div>

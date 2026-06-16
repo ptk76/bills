@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import styles from "./Contact.module.css";
+import { useT } from "../i18n/I18nContext";
 
 function Contact(): React.JSX.Element {
   const { friends, groups, addFriend, deleteFriend, updateFriend } =
     useAppContext();
+  const t = useT();
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleAddName = () => {
@@ -13,7 +15,7 @@ function Contact(): React.JSX.Element {
   };
 
   const handleDeleteName = (id: number) => {
-    if (confirm("Are you sure you want to delete this money return record?")) {
+    if (confirm(t("contact.confirmDelete"))) {
       deleteFriend(id);
     }
   };
@@ -31,7 +33,7 @@ function Contact(): React.JSX.Element {
   return (
     <div className={styles["contact-container"]}>
       <div className={styles["name-list-section"]}>
-        <h2>Friends</h2>
+        <h2>{t("contact.title")}</h2>
 
         <div className={styles["add-name-form"]}>
           <input
@@ -39,11 +41,11 @@ function Contact(): React.JSX.Element {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Enter a name"
+            placeholder={t("contact.enterName")}
             className={styles["name-input"]}
           />
           <button onClick={handleAddName} className={styles["add-button"]}>
-            Add Name
+            {t("contact.addName")}
           </button>
         </div>
 
@@ -61,7 +63,7 @@ function Contact(): React.JSX.Element {
                   }}
                   className={styles["select"]}
                 >
-                  <option value="null">No Tribe</option>
+                  <option value="null">{t("contact.noTribe")}</option>
                   {groups.map((grp) => (
                     <option key={grp.id} value={grp.id}>
                       {grp.surname}
@@ -72,15 +74,13 @@ function Contact(): React.JSX.Element {
                   onClick={() => handleDeleteName(friend.id)}
                   className={styles["delete-button"]}
                 >
-                  Delete
+                  {t("common.delete")}
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p className={styles["empty-message"]}>
-            No names added yet. Add your first contact above!
-          </p>
+          <p className={styles["empty-message"]}>{t("contact.empty")}</p>
         )}
       </div>
     </div>

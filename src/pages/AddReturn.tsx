@@ -3,12 +3,14 @@ import { useAppContext } from "../context/AppContext";
 import styles from "./AddReturn.module.css";
 import { OnNavigate, PageData } from "../App";
 import { CurrencyDropdown } from "../widgets/Currency";
+import { useT } from "../i18n/I18nContext";
 
 function AddReturn(props: {
   onNavigate: OnNavigate;
   data: PageData;
 }): React.JSX.Element {
   const { friends, addMoneyReturn } = useAppContext();
+  const t = useT();
   const [fromFriendId, setFromFriendId] = useState<number | null>(null);
   const [toFriendId, setToFriendId] = useState<number | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
@@ -62,16 +64,13 @@ function AddReturn(props: {
     <div className={styles["money-returns-container"]}>
       <div className={styles["money-returns-section"]}>
         <div className={styles.header}>
-          <h2>Return Money</h2>
+          <h2>{t("addReturn.title")}</h2>
           <div className={styles.close} onClick={onClose}>
             ✕
           </div>
         </div>
         {friends.length < 2 ? (
-          <p className={styles["warning-message"]}>
-            You need at least 2 friends to record money returns. Please add
-            friends on the Friends page.
-          </p>
+          <p className={styles["warning-message"]}>{t("returns.needFriends")}</p>
         ) : (
           <div className={styles["add-return-form"]}>
             <div className={styles["form-row"]}>
@@ -79,21 +78,23 @@ function AddReturn(props: {
                 <div
                   className={styles["form-group"] + " " + styles["full-width"]}
                 >
-                  <label htmlFor="description">Description (optional):</label>
+                  <label htmlFor="description">
+                    {t("addReturn.description")}
+                  </label>
                   <input
                     id="description"
                     type="text"
                     value={title ?? ""}
                     onChange={(e) => setTitle(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="e.g., Payment for dinner, Rent share"
+                    placeholder={t("addReturn.descriptionPlaceholder")}
                     className={styles["description-input"]}
                   />
                 </div>
               </div>
 
               <div className={styles["form-group"]}>
-                <label htmlFor="from-friend">From:</label>
+                <label htmlFor="from-friend">{t("addReturn.from")}</label>
                 <select
                   id="from-friend"
                   value={fromFriendId ?? ""}
@@ -103,7 +104,7 @@ function AddReturn(props: {
                   }}
                   className={styles["friend-select"]}
                 >
-                  <option value="">Select person</option>
+                  <option value="">{t("addReturn.selectPerson")}</option>
                   {friends.map((friend) => (
                     <option key={friend.id} value={friend.id}>
                       {friend.nick}
@@ -113,7 +114,7 @@ function AddReturn(props: {
               </div>
 
               <div className={styles["form-group"]}>
-                <label htmlFor="to-friend">To:</label>
+                <label htmlFor="to-friend">{t("addReturn.to")}</label>
                 <select
                   id="to-friend"
                   value={toFriendId ?? ""}
@@ -123,7 +124,7 @@ function AddReturn(props: {
                   }}
                   className={styles["friend-select"]}
                 >
-                  <option value="">Select person</option>
+                  <option value="">{t("addReturn.selectPerson")}</option>
                   {friends.map((friend) => (
                     <option key={friend.id} value={friend.id}>
                       {friend.nick}
@@ -133,7 +134,7 @@ function AddReturn(props: {
               </div>
 
               <div className={styles["form-group"]}>
-                <label htmlFor="amount">Amount:</label>
+                <label htmlFor="amount">{t("addReturn.amount")}</label>
                 <input
                   id="amount"
                   type="number"
@@ -150,7 +151,7 @@ function AddReturn(props: {
                 />
               </div>
               <div className={styles["form-group"]}>
-                <label htmlFor="amount">Currency:</label>
+                <label htmlFor="amount">{t("common.currency")}</label>
                 <CurrencyDropdown currency={currency} onChange={setCurrency} />
               </div>
             </div>
@@ -165,7 +166,7 @@ function AddReturn(props: {
                 fromFriendId === toFriendId
               }
             >
-              Record Return
+              {t("returns.recordReturn")}
             </button>
           </div>
         )}

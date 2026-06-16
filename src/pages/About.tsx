@@ -5,11 +5,13 @@ import { OnNavigate, PageData } from "../App";
 import Warning from "../widgets/Warning";
 import { areItemsValid, isItemValid } from "../utils/validator";
 import Currency, { CurrencyDropdown } from "../widgets/Currency";
+import { useT } from "../i18n/I18nContext";
 
 function About(props: {
   onNavigate: OnNavigate;
   data: PageData;
 }): React.JSX.Element {
+  const t = useT();
   const {
     currentBillId,
     selectBill,
@@ -221,10 +223,10 @@ function About(props: {
               />
               <div className="title-actions">
                 <button onClick={saveTitleEdit} className="save-button">
-                  Save
+                  {t("common.save")}
                 </button>
                 <button onClick={cancelTitleEdit} className="cancel-button">
-                  Cancel
+                  {t("common.cancel")}
                 </button>
               </div>
             </div>
@@ -235,7 +237,7 @@ function About(props: {
               )}
               <h2>{title}</h2>
               <button onClick={startEditingTitle} className="edit-title-button">
-                Edit Title
+                {t("about.editTitle")}
               </button>
             </div>
           )}
@@ -244,7 +246,7 @@ function About(props: {
         {countItems() > 0 && (
           <div className="total-price-section">
             <div className="total-price-content">
-              <span className="total-price-label">Total Price:</span>
+              <span className="total-price-label">{t("about.totalPrice")}</span>
               <span className="total-price-amount">
                 <Currency currency={currency} amount={calculateTotalPrice()} />
               </span>
@@ -254,7 +256,7 @@ function About(props: {
 
         {friends.length > 0 && (
           <div className="names-summary-section">
-            <h3>Paid by:</h3>
+            <h3>{t("common.paidBy")}</h3>
             <div className="form-group">
               <select
                 id="from-friend"
@@ -265,7 +267,7 @@ function About(props: {
                 }}
                 className="friend-select"
               >
-                <option value="null">None</option>
+                <option value="null">{t("common.none")}</option>
                 {friends.map((friend) => (
                   <option key={friend.id} value={friend.id}>
                     {friend.nick}
@@ -277,7 +279,7 @@ function About(props: {
         )}
 
         <div className="names-summary-section">
-          <h3>Currency:</h3>
+          <h3>{t("common.currency")}</h3>
           <div className="form-group">
             <CurrencyDropdown currency={currency} onChange={setCurrency} />
           </div>
@@ -285,7 +287,7 @@ function About(props: {
 
         {friends.length > 0 && (
           <div className="names-summary-section">
-            <h3>People & Totals</h3>
+            <h3>{t("about.peopleTotals")}</h3>
             <div className="names-summary-list">
               {friends.map((friend) => {
                 const total = calculatePersonTotal(friend.id);
@@ -309,7 +311,7 @@ function About(props: {
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Item name"
+            placeholder={t("about.itemName")}
             className="item-name-input"
           />
           <input
@@ -317,7 +319,7 @@ function About(props: {
             value={itemPrice}
             onChange={(e) => setItemPrice(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Price"
+            placeholder={t("about.price")}
             min="0"
             step="0.01"
             className="item-price-input"
@@ -327,22 +329,19 @@ function About(props: {
             value={itemQuantity}
             onChange={(e) => setItemQuantity(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Quantity"
+            placeholder={t("about.quantity")}
             min="1"
             max="100"
             step="1"
             className="item-price-input"
           />
           <button onClick={handleAddItem} className="add-item-button">
-            Add Item
+            {t("about.addItem")}
           </button>
         </div>
 
         {friends.length === 0 && (
-          <p className="warning-message">
-            No contacts available. Please add contacts on the Contact page
-            first.
-          </p>
+          <p className="warning-message">{t("about.noContacts")}</p>
         )}
 
         {countItems() > 0 ? (
@@ -355,7 +354,7 @@ function About(props: {
                     // Edit mode
                     <div className="edit-mode">
                       <div className="edit-header">
-                        <h3>Edit Item</h3>
+                        <h3>{t("about.editItem")}</h3>
                       </div>
                       <div className="edit-form">
                         <input
@@ -363,7 +362,7 @@ function About(props: {
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                           onKeyPress={handleEditKeyPress}
-                          placeholder="Item name"
+                          placeholder={t("about.itemName")}
                           className="edit-name-input"
                           autoFocus
                         />
@@ -372,7 +371,7 @@ function About(props: {
                           value={editPrice}
                           onChange={(e) => setEditPrice(e.target.value)}
                           onKeyPress={handleEditKeyPress}
-                          placeholder="Price"
+                          placeholder={t("about.price")}
                           min="0"
                           step="0.01"
                           className="edit-price-input"
@@ -382,7 +381,7 @@ function About(props: {
                           value={editQuantity}
                           onChange={(e) => setEditQuantity(e.target.value)}
                           onKeyPress={handleEditKeyPress}
-                          placeholder="Quantity"
+                          placeholder={t("about.quantity")}
                           min="1"
                           max="100"
                           step="1"
@@ -391,13 +390,13 @@ function About(props: {
                       </div>
                       <div className="edit-actions">
                         <button onClick={saveEdit} className="save-button">
-                          Save
+                          {t("common.save")}
                         </button>
                         <button
                           onClick={cancelEditing}
                           className="cancel-button"
                         >
-                          Cancel
+                          {t("common.cancel")}
                         </button>
                       </div>
                     </div>
@@ -414,13 +413,13 @@ function About(props: {
                             onClick={() => startEditing(item.id)}
                             className="edit-button"
                           >
-                            Edit
+                            {t("common.edit")}
                           </button>
                           <button
                             onClick={() => deleteItem(item.id)}
                             className="delete-item-button"
                           >
-                            Delete
+                            {t("common.delete")}
                           </button>
                         </div>
                       </div>
@@ -439,7 +438,7 @@ function About(props: {
 
                       {friends.length > 0 && (
                         <div className="names-checkboxes">
-                          <h4>Split with:</h4>
+                          <h4>{t("about.splitWith")}</h4>
                           <div className="checkbox-list">
                             {friends.map((friend) => {
                               const splitByFriend = calculateItemSplitByFriend(
@@ -499,9 +498,7 @@ function About(props: {
               ))}
           </div>
         ) : (
-          <p className="empty-message">
-            No items added yet. Add your first item above!
-          </p>
+          <p className="empty-message">{t("about.noItems")}</p>
         )}
       </div>
     </div>

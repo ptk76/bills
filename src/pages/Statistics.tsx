@@ -6,6 +6,7 @@ import { OnNavigate } from "../App";
 import { areBillsValid, isBillValid } from "../utils/validator";
 import Warning from "../widgets/Warning";
 import Currency from "../widgets/Currency";
+import { useT } from "../i18n/I18nContext";
 
 interface DebtNicks {
   from: string;
@@ -19,6 +20,7 @@ interface DebtNicks {
 function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { friends, groups, bills, items, splits, moneyReturns } =
     useAppContext();
+  const t = useT();
 
   // Calculate how much each person owes for a specific bill
   const calculateBillDebts = (billId: number): DebtNicks[] => {
@@ -197,7 +199,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     amount: number,
   ) => {
     props.onNavigate("add-return", {
-      addReturn: { title: "Debt repayment", from, to, currency, amount },
+      addReturn: { title: t("stats.debtRepayment"), from, to, currency, amount },
     });
   };
 
@@ -216,17 +218,17 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
               <Warning />
             </div>
           )}
-          <h2>Payment Statistics</h2>
+          <h2>{t("stats.title")}</h2>
         </div>
 
         {bills.length === 0 ? (
           <div className="empty-state">
-            <p>No bills available. Create a bill to see statistics.</p>
+            <p>{t("stats.noBills")}</p>
           </div>
         ) : (
           <>
             <div className="total-summary-section">
-              <h3>Total Debts by Tribes</h3>
+              <h3>{t("stats.byTribes")}</h3>
               {groupDebts.length > 0 ? (
                 <div className="debts-list">
                   {groupDebts.map((debt, index) => (
@@ -236,7 +238,9 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                         <span className="debt-arrow">→</span>
                         {debt.to && <span className="debt-to">{debt.to}</span>}
                         {!debt.to && (
-                          <span className="debt-to unknown">UNKNOWN</span>
+                          <span className="debt-to unknown">
+                            {t("stats.unknown")}
+                          </span>
                         )}
                       </div>
                       <span className="debt-amount">
@@ -259,19 +263,19 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                           }
                           className="paid_off"
                         >
-                          Pay off
+                          {t("stats.payOff")}
                         </button>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="no-debts-message">No debts.</p>
+                <p className="no-debts-message">{t("stats.noDebts")}</p>
               )}
             </div>
 
             <div className="total-summary-section">
-              <h3>Total Debts by Individuals</h3>
+              <h3>{t("stats.byIndividuals")}</h3>
               {balancedDebts.length > 0 ? (
                 <div className="debts-list">
                   {balancedDebts.map((debt, index) => (
@@ -281,7 +285,9 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                         <span className="debt-arrow">→</span>
                         {debt.to && <span className="debt-to">{debt.to}</span>}
                         {!debt.to && (
-                          <span className="debt-to unknown">UNKNOWN</span>
+                          <span className="debt-to unknown">
+                            {t("stats.unknown")}
+                          </span>
                         )}
                       </div>
                       <span className="debt-amount">
@@ -302,20 +308,20 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                           }
                           className="paid_off"
                         >
-                          Pay off
+                          {t("stats.payOff")}
                         </button>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="no-debts-message">No debts to display.</p>
+                <p className="no-debts-message">{t("stats.noDebtsToDisplay")}</p>
               )}
             </div>
 
             {/* Per-Bill Breakdown */}
             <div className="bills-breakdown-section">
-              <h3>Bills Breakdown</h3>
+              <h3>{t("stats.breakdown")}</h3>
               {billsWithDebts.length > 0 ? (
                 <div className="bills-breakdown-list">
                   {billsWithDebts.map((bill) => {
@@ -343,7 +349,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                           <h4>{bill.title}</h4>
                           {payer && (
                             <span className="bill-payer">
-                              Paid by: <strong>{payer.nick}</strong>
+                              {t("common.paidBy")} <strong>{payer.nick}</strong>
                             </span>
                           )}
                           <span className="bill-total">
@@ -373,7 +379,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                           </div>
                         ) : (
                           <p className="no-debts-message">
-                            No debts for this bill.
+                            {t("stats.noDebtsForBill")}
                           </p>
                         )}
                       </div>
@@ -382,7 +388,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                 </div>
               ) : (
                 <p className="no-bills-message">
-                  No bills with payment information available.
+                  {t("stats.noBillsWithPayment")}
                 </p>
               )}
             </div>

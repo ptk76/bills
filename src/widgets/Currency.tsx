@@ -1,5 +1,6 @@
 import React from "react";
 import style from "./Currency.module.css";
+import { useT } from "../i18n/I18nContext";
 
 export const regionToCurrency = {
   US: "USD",
@@ -75,6 +76,7 @@ export function CurrencyDropdown(props: {
   currency: string | null;
   onChange: (currency: string | null) => void;
 }): React.JSX.Element {
+  const t = useT();
   const getRegionCurrency = () => {
     // Use a region-to-currency map as the source of truth
     const region = new Intl.Locale(navigator.language).maximize().region;
@@ -116,7 +118,7 @@ export function CurrencyDropdown(props: {
       }}
       className={style.option}
     >
-      <option value="null">None</option>
+      <option value="null">{t("common.none")}</option>
       {buildOptions()}
     </select>
   );

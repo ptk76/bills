@@ -5,10 +5,12 @@ import { OnNavigate } from "../App";
 import Warning from "../widgets/Warning";
 import { isBillValid } from "../utils/validator";
 import Currency from "../widgets/Currency";
+import { useT } from "../i18n/I18nContext";
 
 function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { friends, items, bills, splits, createBill, deleteBill, selectBill } =
     useAppContext();
+  const t = useT();
 
   const handleCreateBill = async () => {
     const billId = await createBill("Monkey");
@@ -29,7 +31,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
 
   const handleDeleteBill = (billId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this bill?")) {
+    if (confirm(t("home.confirmDelete"))) {
       deleteBill(billId);
     }
   };
@@ -53,17 +55,17 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
   return (
     <div className="home-container">
       <div className="bills-section">
-        <h2>The Bills</h2>
+        <h2>{t("home.title")}</h2>
 
         <div className="create-bill-form">
           <button onClick={handleCreateBill} className="create-bill-button">
-            Create Bill
+            {t("home.createBill")}
           </button>
           <button
             onClick={handleCreateBillFromCsv}
             className="create-bill-from-csv-button"
           >
-            Create Bill from CSV
+            {t("home.createBillFromCsv")}
           </button>
         </div>
 
@@ -87,10 +89,12 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
                   <div className="bill-info">
                     <div className="bill-stats">
                       <span className="stat-item">
-                        Paid by:{" "}
+                        {t("common.paidBy")}{" "}
                         <strong>
                           {paidBy(bill) ?? (
-                            <strong className="paid-by-none">NONE</strong>
+                            <strong className="paid-by-none">
+                              {t("home.payerNone")}
+                            </strong>
                           )}
                         </strong>
                       </span>
@@ -99,7 +103,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
                       onClick={(e) => handleDeleteBill(bill.id, e)}
                       className="delete-bill-button"
                     >
-                      Delete
+                      {t("common.delete")}
                     </button>
                   </div>
                 </div>
@@ -108,7 +112,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
           </div>
         ) : (
           <div className="empty-state">
-            <p>No bills yet. Create your first bill above!</p>
+            <p>{t("home.empty")}</p>
           </div>
         )}
       </div>

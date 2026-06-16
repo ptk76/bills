@@ -21,3 +21,10 @@
 .navigation div:hover {
   background-color: #555;
 }
+
+.navigation .lang-switcher {
+  margin-left: auto;
+  border: 1px solid #777;
+  min-width: 2rem;
+  text-align: center;
+}

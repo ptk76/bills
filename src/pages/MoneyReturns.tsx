@@ -3,32 +3,31 @@ import { useAppContext } from "../context/AppContext";
 import styles from "./MoneyReturns.module.css";
 import { OnNavigate } from "../App";
 import Currency from "../widgets/Currency";
+import { useT } from "../i18n/I18nContext";
 
 function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { currency, friends, moneyReturns, deleteMoneyReturn } =
     useAppContext();
+  const t = useT();
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this money return record?")) {
+    if (confirm(t("returns.confirmDelete"))) {
       deleteMoneyReturn(id);
     }
   };
 
   const getFriendName = (friendId: number): string => {
     const friend = friends.find((f) => f.id === friendId);
-    return friend ? friend.nick : "Unknown";
+    return friend ? friend.nick : t("common.unknown");
   };
 
   return (
     <div className={styles["money-returns-container"]}>
       <div className={styles["money-returns-section"]}>
-        <h2>Money Returns</h2>
+        <h2>{t("returns.title")}</h2>
 
         {friends.length < 2 ? (
-          <p className={styles["warning-message"]}>
-            You need at least 2 friends to record money returns. Please add
-            friends on the Friends page.
-          </p>
+          <p className={styles["warning-message"]}>{t("returns.needFriends")}</p>
         ) : (
           <>
             <div className={styles["add-return-form"]}>
@@ -36,7 +35,7 @@ function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
                 onClick={() => props.onNavigate("add-return")}
                 className={styles["add-return-button"]}
               >
-                Record Return
+                {t("returns.recordReturn")}
               </button>
             </div>
 
@@ -71,14 +70,14 @@ function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
                       onClick={() => handleDelete(moneyReturn.id)}
                       className={styles["delete-return-button"]}
                     >
-                      Delete
+                      {t("common.delete")}
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
               <div className={styles["empty-state"]}>
-                <p>No money returns recorded yet. Add one above!</p>
+                <p>{t("returns.empty")}</p>
               </div>
             )}
           </>

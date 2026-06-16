@@ -3,6 +3,7 @@ import { Item, useAppContext } from "../context/AppContext";
 import styles from "./Scan.module.css";
 import { splitLineByLastTwo } from "../utils/lexer";
 import { OnNavigate } from "../App";
+import { useT } from "../i18n/I18nContext";
 
 type BillRow = {
   name: string;
@@ -16,6 +17,7 @@ type BillRow = {
 
 function Csv(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { createFullBill } = useAppContext();
+  const t = useT();
   const [bill, setBill] = useState<BillRow[]>([]);
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
@@ -113,13 +115,13 @@ function Csv(props: { onNavigate: OnNavigate }): React.JSX.Element {
                   onClick={saveTitleEdit}
                   className={styles["save-button"]}
                 >
-                  Save
+                  {t("common.save")}
                 </button>
                 <button
                   onClick={cancelTitleEdit}
                   className={styles["cancel-button"]}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
               </div>
             </div>
@@ -130,7 +132,7 @@ function Csv(props: { onNavigate: OnNavigate }): React.JSX.Element {
                 onClick={startEditingTitle}
                 className={styles["edit-title-button"]}
               >
-                Edit Title
+                {t("about.editTitle")}
               </button>
             </div>
           )}
@@ -139,10 +141,16 @@ function Csv(props: { onNavigate: OnNavigate }): React.JSX.Element {
         <div className={styles["parsed-card"]}>
           <div className={styles["table-header"]}>
             <div className={styles["valid-column"]}></div>
-            <div className={styles["name-column"]}>Name</div>
-            <div className={styles["quantity-column"]}>Qt.</div>
-            <div className={styles["unit-price-column"]}>Price</div>
-            <div className={styles["total-price-column"]}>Total</div>
+            <div className={styles["name-column"]}>{t("scan.colName")}</div>
+            <div className={styles["quantity-column"]}>
+              {t("scan.colQuantity")}
+            </div>
+            <div className={styles["unit-price-column"]}>
+              {t("scan.colPrice")}
+            </div>
+            <div className={styles["total-price-column"]}>
+              {t("scan.colTotal")}
+            </div>
           </div>
           {showParsedBill()}
         </div>
@@ -152,7 +160,7 @@ function Csv(props: { onNavigate: OnNavigate }): React.JSX.Element {
             rows={20}
             // value={`itemName`}
             onChange={(e) => parseTextToBIll(e.target.value)}
-            placeholder="Item name"
+            placeholder={t("about.itemName")}
             className={styles["item-name-input"]}
           />
         </div>
@@ -161,7 +169,7 @@ function Csv(props: { onNavigate: OnNavigate }): React.JSX.Element {
           className={styles["add-bill-button"]}
           disabled={countValidItems() === 0 || editingTitle}
         >
-          Add bill ({countValidItems()} items)
+          {t("scan.addBill", { count: countValidItems() })}
         </button>
       </div>
     </div>
