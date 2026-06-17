@@ -6,8 +6,7 @@ import Currency from "../widgets/Currency";
 import { useT } from "../i18n/I18nContext";
 
 function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
-  const { currency, friends, moneyReturns, deleteMoneyReturn } =
-    useAppContext();
+  const { friends, moneyReturns, deleteMoneyReturn } = useAppContext();
   const t = useT();
 
   const handleDelete = (id: number) => {
@@ -27,7 +26,9 @@ function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
         <h2>{t("returns.title")}</h2>
 
         {friends.length < 2 ? (
-          <p className={styles["warning-message"]}>{t("returns.needFriends")}</p>
+          <p className={styles["warning-message"]}>
+            {t("returns.needFriends")}
+          </p>
         ) : (
           <>
             <div className={styles["add-return-form"]}>

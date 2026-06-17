@@ -7,7 +7,7 @@ import { areBillsValid, isBillValid } from "../utils/validator";
 import Warning from "../widgets/Warning";
 import Currency from "../widgets/Currency";
 import { useT } from "../i18n/I18nContext";
-import styleReturns from "./MoneyReturns.module.css";
+import MoneyReturns from "./MoneyReturns";
 
 interface DebtNicks {
   from: string;
@@ -19,27 +19,9 @@ interface DebtNicks {
 }
 
 function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
-  const {
-    friends,
-    groups,
-    bills,
-    items,
-    splits,
-    moneyReturns,
-    deleteMoneyReturn,
-  } = useAppContext();
+  const { friends, groups, bills, items, splits, moneyReturns } =
+    useAppContext();
   const t = useT();
-
-  const handleReturnDelete = (id: number) => {
-    if (confirm(t("returns.confirmDelete"))) {
-      deleteMoneyReturn(id);
-    }
-  };
-
-  const getFriendName = (friendId: number): string => {
-    const friend = friends.find((f) => f.id === friendId);
-    return friend ? friend.nick : t("common.unknown");
-  };
 
   // Calculate how much each person owes for a specific bill
   const calculateBillDebts = (billId: number): DebtNicks[] => {
@@ -299,7 +281,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
               )}
             </div>
 
-            <div className="total-summary-section">
+            {/* <div className="total-summary-section">
               <h3>{t("stats.byIndividuals")}</h3>
               {balancedDebts.length > 0 ? (
                 <div className="debts-list">
@@ -344,73 +326,9 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
                   {t("stats.noDebtsToDisplay")}
                 </p>
               )}
-            </div>
-
+            </div> */}
             <div className="total-summary-section">
-              <h3>{t("returns.title")}</h3>
-              {friends.length < 2 ? (
-                <p className={styleReturns["warning-message"]}>
-                  {t("returns.needFriends")}
-                </p>
-              ) : (
-                <>
-                  <div className={styleReturns["add-return-form"]}>
-                    <button
-                      onClick={() => props.onNavigate("add-return")}
-                      className={styleReturns["add-return-button"]}
-                    >
-                      {t("returns.recordReturn")}
-                    </button>
-                  </div>
-
-                  {moneyReturns.length > 0 ? (
-                    <div className={styleReturns["returns-list"]}>
-                      {moneyReturns.map((moneyReturn) => (
-                        <div
-                          key={moneyReturn.id}
-                          className={styleReturns["return-card"]}
-                        >
-                          <div className={styleReturns["return-header"]}>
-                            {moneyReturn.title && (
-                              <div
-                                className={styleReturns["return-description"]}
-                              >
-                                {moneyReturn.title}
-                              </div>
-                            )}
-                            <div className={styleReturns["return-people"]}>
-                              <span className={styleReturns["from-person"]}>
-                                {getFriendName(moneyReturn.from_friend_id)}
-                              </span>
-                              <span className={styleReturns["arrow"]}>→</span>
-                              <span className={styleReturns["to-person"]}>
-                                {getFriendName(moneyReturn.to_friend_id)}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className={styleReturns["return-amount"]}>
-                            <Currency
-                              currency={moneyReturn.currency}
-                              amount={moneyReturn.amount}
-                            />
-                          </div>
-                          <button
-                            onClick={() => handleReturnDelete(moneyReturn.id)}
-                            className={styleReturns["delete-return-button"]}
-                          >
-                            {"🗑️"}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className={styleReturns["empty-state"]}>
-                      <p>{t("returns.empty")}</p>
-                    </div>
-                  )}
-                </>
-              )}
+              <MoneyReturns onNavigate={props.onNavigate} />
             </div>
             {/* Per-Bill Breakdown */}
             <div className="bills-breakdown-section">
