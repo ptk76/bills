@@ -11,7 +11,7 @@ function Navigation(props: { onNavigate: OnNavigate }): React.JSX.Element {
       <div onClick={() => props.onNavigate("home")}>{t("nav.bills")}</div>
       <div onClick={() => props.onNavigate("friends")}>{t("nav.friends")}</div>
       <div onClick={() => props.onNavigate("groups")}>{t("nav.tribes")}</div>
-      <div onClick={() => props.onNavigate("returns")}>{t("nav.returns")}</div>
+      {/* <div onClick={() => props.onNavigate("returns")}>{t("nav.returns")}</div> */}
       <div onClick={() => props.onNavigate("stats")}>{t("nav.debts")}</div>
     </div>
   );

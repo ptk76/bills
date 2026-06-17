@@ -98,6 +98,9 @@ export function CurrencyDropdown(props: {
   const buildOptions = () => {
     const result = [];
     const currency = props.currency ? props.currency : getDefault();
+    // Inform the dropdown user that a default currency was set
+    if (props.currency === null) props.onChange(currency);
+
     const currencies = Array.from(new Set(Object.values(regionToCurrency)));
     for (const curr of currencies) {
       result.push(
