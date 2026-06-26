@@ -8,6 +8,7 @@ import Warning from "../widgets/Warning";
 import Currency from "../widgets/Currency";
 import { useT } from "../i18n/I18nContext";
 import MoneyReturns from "./MoneyReturns";
+import ItemDiv from "../widgets/ItemDiv";
 
 interface DebtNicks {
   from: string;
@@ -68,50 +69,6 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     });
 
     return debts;
-  };
-
-  const getBalancedDebts = (): DebtNicks[] => {
-    const calc = new Calculator(
-      bills,
-      items,
-      friends,
-      groups,
-      splits,
-      moneyReturns,
-    );
-    const total = calc.getTotalSpend();
-    // add returns to spends in order to deduct them automatically
-    moneyReturns.forEach((moneyReturn) => {
-      total.push({
-        from: moneyReturn.to_friend_id,
-        to: moneyReturn.from_friend_id,
-        amount: moneyReturn.amount,
-        currency: moneyReturn.currency,
-      });
-    });
-    const aggregatedDebts = calc.aggregateDebts(total);
-    const balancedDebts = calc.balanceDebts(aggregatedDebts);
-
-    const idToNick = (friend_id: number | null) => {
-      if (friend_id === null) return null;
-
-      const friend = friends.find((friend) => friend.id == friend_id);
-      if (!friend) return null;
-      return friend.nick;
-    };
-
-    const spendNicks: DebtNicks[] = calc
-      .clearData(balancedDebts)
-      .map((spend) => ({
-        from: idToNick(spend.from) ?? "???",
-        fromId: spend.from,
-        to: idToNick(spend.to),
-        toId: spend.to,
-        amount: spend.amount,
-        currency: spend.currency,
-      }));
-
-    return spendNicks;
   };
 
   const GROUP_OFFSET = 100000;
@@ -182,7 +139,6 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
     return spendNicks;
   };
 
-  const balancedDebts = getBalancedDebts();
   const groupDebts = getGroupDebts();
   const billsWithDebts = bills.filter(
     (bill) =>
@@ -234,175 +190,108 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
           </div>
         ) : (
           <>
-            <div className="total-summary-section">
-              <h3>{t("stats.byTribes")}</h3>
-              {groupDebts.length > 0 ? (
-                <div className="debts-list">
-                  {groupDebts.map((debt, index) => (
-                    <div key={index} className="debt-item total-debt">
-                      <div className="debt-info">
-                        <span className="debt-from">{debt.from}</span>
-                        <span className="debt-arrow">→</span>
-                        {debt.to && <span className="debt-to">{debt.to}</span>}
-                        {!debt.to && (
-                          <span className="debt-to unknown">
-                            {t("stats.unknown")}
-                          </span>
-                        )}
-                      </div>
-                      <span className="debt-amount">
-                        <Currency
-                          currency={debt.currency}
-                          amount={debt.amount}
-                        />
-                      </span>
-                      {debt.to !== null && (
-                        <button
-                          onClick={() =>
-                            handlePaidOff(
-                              debt.fromId >= GROUP_OFFSET ? null : debt.fromId,
-                              debt.toId && debt.toId >= GROUP_OFFSET
-                                ? null
-                                : debt.toId,
-                              debt.currency,
-                              debt.amount,
-                            )
-                          }
-                          className="paid_off"
-                        >
-                          {t("stats.payOff")}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="no-debts-message">{t("stats.noDebts")}</p>
-              )}
-            </div>
+            <h3>{t("stats.byTribes")}</h3>
+            {groupDebts.length > 0 ? (
+              <>
+                {groupDebts.map((debt, index) => (
+                  <ItemDiv
+                    id={index}
+                    onClick={() => {}}
+                    warning={!!!debt.to}
+                    currency={debt.currency}
+                    amount={debt.amount}
+                    title={debt.from}
+                    subtitle={"→ " + (debt.to ?? t("stats.unknown"))}
+                    onButtonClick={() =>
+                      handlePaidOff(
+                        debt.fromId >= GROUP_OFFSET ? null : debt.fromId,
+                        debt.toId && debt.toId >= GROUP_OFFSET
+                          ? null
+                          : debt.toId,
+                        debt.currency,
+                        debt.amount,
+                      )
+                    }
+                    buttonTitle={t("stats.payOff")}
+                  />
+                ))}
+              </>
+            ) : (
+              <p className="no-debts-message">{t("stats.noDebts")}</p>
+            )}
 
-            {/* <div className="total-summary-section">
-              <h3>{t("stats.byIndividuals")}</h3>
-              {balancedDebts.length > 0 ? (
-                <div className="debts-list">
-                  {balancedDebts.map((debt, index) => (
-                    <div key={index} className="debt-item total-debt">
-                      <div className="debt-info">
-                        <span className="debt-from">{debt.from}</span>
-                        <span className="debt-arrow">→</span>
-                        {debt.to && <span className="debt-to">{debt.to}</span>}
-                        {!debt.to && (
-                          <span className="debt-to unknown">
-                            {t("stats.unknown")}
-                          </span>
-                        )}
-                      </div>
-                      <span className="debt-amount">
-                        <Currency
-                          currency={debt.currency}
-                          amount={debt.amount}
-                        />
-                      </span>
-                      {debt.to !== null && (
-                        <button
-                          onClick={() =>
-                            handlePaidOff(
-                              debt.fromId,
-                              debt.toId,
-                              debt.currency,
-                              debt.amount,
-                            )
-                          }
-                          className="paid_off"
-                        >
-                          {t("stats.payOff")}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="no-debts-message">
-                  {t("stats.noDebtsToDisplay")}
-                </p>
-              )}
-            </div> */}
-            <div className="total-summary-section">
-              <MoneyReturns onNavigate={props.onNavigate} />
-            </div>
+            <MoneyReturns onNavigate={props.onNavigate} />
             {/* Per-Bill Breakdown */}
-            <div className="bills-breakdown-section">
-              <h3>{t("stats.breakdown")}</h3>
-              {billsWithDebts.length > 0 ? (
-                <div className="bills-breakdown-list">
-                  {billsWithDebts.map((bill) => {
-                    const billDebts = calculateBillDebts(bill.id);
-                    const payer = friends.find((f) => f.id === bill.paid_by);
-                    const billTotal = items.reduce(
-                      (total, item) =>
-                        item.bill_id === bill.id
-                          ? total + item.price * item.quantity
-                          : total,
-                      0,
-                    );
+            <h3>{t("stats.breakdown")}</h3>
+            {billsWithDebts.length > 0 ? (
+              <div className="bills-breakdown-list">
+                {billsWithDebts.map((bill) => {
+                  const billDebts = calculateBillDebts(bill.id);
+                  const payer = friends.find((f) => f.id === bill.paid_by);
+                  const billTotal = items.reduce(
+                    (total, item) =>
+                      item.bill_id === bill.id
+                        ? total + item.price * item.quantity
+                        : total,
+                    0,
+                  );
 
-                    return (
-                      <div key={bill.id} className="bill-breakdown-card">
-                        <div className="bill-breakdown-header">
-                          {!isBillValid(bill, items, splits) && (
-                            <div
-                              className="warning"
-                              onClick={() => handleWarning(bill.id)}
-                            >
-                              <Warning />
-                            </div>
-                          )}
-                          <h4>{bill.title}</h4>
-                          {payer && (
-                            <span className="bill-payer">
-                              {t("common.paidBy")} <strong>{payer.nick}</strong>
-                            </span>
-                          )}
-                          <span className="bill-total">
-                            <Currency
-                              currency={bill.currency}
-                              amount={billTotal}
-                            />
-                          </span>
-                        </div>
-                        {billDebts.length > 0 ? (
-                          <div className="debts-list">
-                            {billDebts.map((debt, index) => (
-                              <div key={index} className="debt-item">
-                                <div className="debt-info">
-                                  <span className="debt-from">{debt.from}</span>
-                                  <span className="debt-arrow">→</span>
-                                  <span className="debt-to">{debt.to}</span>
-                                </div>
-                                <span className="debt-amount">
-                                  <Currency
-                                    currency={debt.currency}
-                                    amount={debt.amount}
-                                  />
-                                </span>
-                              </div>
-                            ))}
+                  return (
+                    <div key={bill.id} className="bill-breakdown-card">
+                      <div className="bill-breakdown-header">
+                        {!isBillValid(bill, items, splits) && (
+                          <div
+                            className="warning"
+                            onClick={() => handleWarning(bill.id)}
+                          >
+                            <Warning />
                           </div>
-                        ) : (
-                          <p className="no-debts-message">
-                            {t("stats.noDebtsForBill")}
-                          </p>
                         )}
+                        <h4>{bill.title}</h4>
+                        {payer && (
+                          <span className="bill-payer">
+                            {t("common.paidBy")} <strong>{payer.nick}</strong>
+                          </span>
+                        )}
+                        <span className="bill-total">
+                          <Currency
+                            currency={bill.currency}
+                            amount={billTotal}
+                          />
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="no-bills-message">
-                  {t("stats.noBillsWithPayment")}
-                </p>
-              )}
-            </div>
+                      {billDebts.length > 0 ? (
+                        <div className="debts-list">
+                          {billDebts.map((debt, index) => (
+                            <div key={index} className="debt-item">
+                              <div className="debt-info">
+                                <span className="debt-from">{debt.from}</span>
+                                <span className="debt-arrow">→</span>
+                                <span className="debt-to">{debt.to}</span>
+                              </div>
+                              <span className="debt-amount">
+                                <Currency
+                                  currency={debt.currency}
+                                  amount={debt.amount}
+                                />
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="no-debts-message">
+                          {t("stats.noDebtsForBill")}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="no-bills-message">
+                {t("stats.noBillsWithPayment")}
+              </p>
+            )}
           </>
         )}
       </div>

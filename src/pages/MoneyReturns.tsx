@@ -2,8 +2,8 @@ import React from "react";
 import { useAppContext } from "../context/AppContext";
 import styles from "./MoneyReturns.module.css";
 import { OnNavigate } from "../App";
-import Currency from "../widgets/Currency";
 import { useT } from "../i18n/I18nContext";
+import ItemDiv from "../widgets/ItemDiv";
 
 function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { friends, moneyReturns, deleteMoneyReturn } = useAppContext();
@@ -21,9 +21,9 @@ function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
   };
 
   return (
-    <div className={styles["money-returns-container"]}>
-      <div className={styles["money-returns-section"]}>
-        <h2>{t("returns.title")}</h2>
+    <div className={styles["money-returns-container2"]}>
+      <div className={styles["money-returns-section2"]}>
+        <h3>{t("returns.title")}</h3>
 
         {friends.length < 2 ? (
           <p className={styles["warning-message"]}>
@@ -43,37 +43,21 @@ function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
             {moneyReturns.length > 0 ? (
               <div className={styles["returns-list"]}>
                 {moneyReturns.map((moneyReturn) => (
-                  <div key={moneyReturn.id} className={styles["return-card"]}>
-                    <div className={styles["return-header"]}>
-                      {moneyReturn.title && (
-                        <div className={styles["return-description"]}>
-                          {moneyReturn.title}
-                        </div>
-                      )}
-                      <div className={styles["return-people"]}>
-                        <span className={styles["from-person"]}>
-                          {getFriendName(moneyReturn.from_friend_id)}
-                        </span>
-                        <span className={styles["arrow"]}>→</span>
-                        <span className={styles["to-person"]}>
-                          {getFriendName(moneyReturn.to_friend_id)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={styles["return-amount"]}>
-                      <Currency
-                        currency={moneyReturn.currency}
-                        amount={moneyReturn.amount}
-                      />
-                    </div>
-                    <button
-                      onClick={() => handleDelete(moneyReturn.id)}
-                      className={styles["delete-return-button"]}
-                    >
-                      {t("common.delete")}
-                    </button>
-                  </div>
+                  <ItemDiv
+                    id={moneyReturn.id}
+                    onClick={() => {}}
+                    warning={false}
+                    subtitle={moneyReturn.title}
+                    currency={moneyReturn.currency}
+                    amount={moneyReturn.amount}
+                    title={
+                      getFriendName(moneyReturn.from_friend_id) +
+                      "→" +
+                      getFriendName(moneyReturn.to_friend_id)
+                    }
+                    onButtonClick={handleDelete}
+                    buttonTitle={t("common.delete")}
+                  />
                 ))}
               </div>
             ) : (

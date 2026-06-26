@@ -2,10 +2,9 @@ import React from "react";
 import { Bill, useAppContext } from "../context/AppContext";
 import "./Home.css";
 import { OnNavigate } from "../App";
-import Warning from "../widgets/Warning";
 import { isBillValid } from "../utils/validator";
-import Currency from "../widgets/Currency";
 import { useT } from "../i18n/I18nContext";
+import ItemDiv from "../widgets/ItemDiv";
 
 function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
   const { friends, items, bills, splits, createBill, deleteBill, selectBill } =
@@ -29,8 +28,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
     props.onNavigate("scan");
   };
 
-  const handleDeleteBill = (billId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeleteBill = (billId: number) => {
     if (confirm(t("home.confirmDelete"))) {
       deleteBill(billId);
     }
@@ -70,46 +68,28 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
         </div>
 
         {bills.length > 0 ? (
-          <div className="bills-list">
+          <>
             {bills.map((bill) => {
               const total = calculateBillTotal(bill.id);
               return (
-                <div
-                  key={bill.id}
-                  className={`bill-card`}
-                  onClick={() => handleSelectBill(bill.id)}
-                >
-                  <div className="bill-header">
-                    {!isBillValid(bill, items, splits) && <Warning />}
-                    <h3>{bill.title}</h3>
-                    <div className="billTotal">
-                      <Currency currency={bill.currency} amount={total} />
-                    </div>
-                  </div>
-                  <div className="bill-info">
-                    <div className="bill-stats">
-                      <span className="stat-item">
-                        {t("common.paidBy")}{" "}
-                        <strong>
-                          {paidBy(bill) ?? (
-                            <strong className="paid-by-none">
-                              {t("home.payerNone")}
-                            </strong>
-                          )}
-                        </strong>
-                      </span>
-                    </div>
-                    <button
-                      onClick={(e) => handleDeleteBill(bill.id, e)}
-                      className="delete-bill-button"
-                    >
-                      {t("common.delete")}
-                    </button>
-                  </div>
-                </div>
+                <ItemDiv
+                  id={bill.id}
+                  onClick={handleSelectBill}
+                  warning={!isBillValid(bill, items, splits)}
+                  title={bill.title}
+                  currency={bill.currency}
+                  amount={total}
+                  subtitle={
+                    t("common.paidBy") +
+                    " " +
+                    (paidBy(bill) ?? t("home.payerNone"))
+                  }
+                  onButtonClick={handleDeleteBill}
+                  buttonTitle={t("common.delete")}
+                />
               );
             })}
-          </div>
+          </>
         ) : (
           <div className="empty-state">
             <p>{t("home.empty")}</p>

@@ -23,27 +23,6 @@
   font-size: 1.25rem;
 }
 
-.total-summary-section {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.bills-breakdown-section {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.debts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
 .debt-item {
   display: flex;
   justify-content: space-between;

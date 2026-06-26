@@ -79,40 +79,6 @@
   white-space: nowrap;
 }
 
-.bills-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
-.bill-card {
-  background-color: white;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid transparent;
-}
-
-.bill-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-.bill-header {
-  display: flex;
-  margin-bottom: 0.5rem;
-  align-items: baseline;
-}
-
-.bill-header h3 {
-  margin: 0;
-  color: #333;
-  font-size: 1.25rem;
-  word-break: break-word;
-}
-
 .current-badge {
   padding: 0.25rem 0.75rem;
   background-color: #646cff;
@@ -123,57 +89,9 @@
   text-transform: uppercase;
 }
 
-.bill-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.bill-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.stat-item {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.stat-item strong {
-  color: #333;
-  font-weight: 600;
-}
-
 .paid-by-none {
   color: red !important;
   font-weight: 900 !important;
-}
-
-.billTotal {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #4caf50;
-  margin-left: auto;
-}
-
-.delete-bill-button {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.delete-bill-button:hover {
-  background-color: #cc0000;
-}
-
-.delete-bill-button:active {
-  background-color: #aa0000;
 }
 
 .empty-state {
