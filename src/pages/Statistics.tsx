@@ -195,6 +195,7 @@ function Statistics(props: { onNavigate: OnNavigate }): React.JSX.Element {
               <>
                 {groupDebts.map((debt, index) => (
                   <ItemDiv
+                    key={index}
                     id={index}
                     onClick={() => {}}
                     warning={!!!debt.to}

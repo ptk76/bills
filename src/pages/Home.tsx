@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Bill, useAppContext } from "../context/AppContext";
 import "./Home.css";
 import { OnNavigate } from "../App";
@@ -6,10 +6,32 @@ import { isBillValid } from "../utils/validator";
 import { useT } from "../i18n/I18nContext";
 import ItemDiv from "../widgets/ItemDiv";
 
+type AiStatus = {
+  status: "idle" | "uploading" | "done" | "error";
+  message?: string;
+};
+
+type ReceiptItem = {
+  name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+};
+
 function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
-  const { friends, items, bills, splits, createBill, deleteBill, selectBill } =
-    useAppContext();
+  const {
+    friends,
+    items,
+    bills,
+    splits,
+    createBill,
+    createFullBill,
+    deleteBill,
+    selectBill,
+  } = useAppContext();
   const t = useT();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [aiStatus, setAiStatus] = useState<AiStatus>({ status: "idle" });
 
   const handleCreateBill = async () => {
     const billId = await createBill("Monkey");
@@ -26,6 +48,63 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
 
   const handleCreateBillFromCsv = () => {
     props.onNavigate("scan");
+  };
+
+  const handleScanPhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoSelected = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+
+    setAiStatus({ status: "uploading", message: t("home.scanPhotoUploading") });
+    try {
+      // Send a picture of the receipt to the worker for AI analysis.
+      const response = await fetch("/ai", {
+        method: "POST",
+        headers: { "Content-Type": file.type || "image/jpeg" },
+        body: file,
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = (await response.json()) as {
+        description?: string;
+        items?: ReceiptItem[] | null;
+      };
+
+      const validItems = (data.items ?? []).filter(
+        (item) =>
+          item.name !== "" &&
+          !isNaN(Number(item.quantity)) &&
+          Number(item.quantity) > 0 &&
+          !isNaN(Number(item.unit_price)),
+      );
+
+      if (validItems.length > 0) {
+        await createFullBill(
+          "Monkey",
+          validItems.map((item) => ({
+            title: item.name,
+            quantity: Number(item.quantity),
+            price: Number(item.unit_price),
+          })),
+        );
+        props.onNavigate("home");
+        return;
+      }
+
+      // No parseable items: still surface what the model read.
+      setAiStatus({
+        status: "done",
+        message: data.description ?? t("home.scanPhotoError"),
+      });
+    } catch (error) {
+      console.error("Photo upload failed:", error);
+      setAiStatus({ status: "error", message: t("home.scanPhotoError") });
+    }
   };
 
   const handleDeleteBill = (billId: number) => {
@@ -65,7 +144,30 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
           >
             {t("home.createBillFromCsv")}
           </button>
+          <button
+            onClick={handleScanPhotoClick}
+            className="create-bill-from-photo-button"
+            disabled={aiStatus.status === "uploading"}
+          >
+            {t("home.scanPhoto")}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handlePhotoSelected}
+            hidden
+          />
         </div>
+
+        {aiStatus.status !== "idle" && (
+          <div className={`ai-status ai-status-${aiStatus.status}`}>
+            {aiStatus.status === "uploading"
+              ? t("home.scanPhotoUploading")
+              : aiStatus.message}
+          </div>
+        )}
 
         {bills.length > 0 ? (
           <>
@@ -73,6 +175,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
               const total = calculateBillTotal(bill.id);
               return (
                 <ItemDiv
+                  key={bill.id}
                   id={bill.id}
                   onClick={handleSelectBill}
                   warning={!isBillValid(bill, items, splits)}

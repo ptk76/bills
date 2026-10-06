@@ -44,6 +44,7 @@ function MoneyReturns(props: { onNavigate: OnNavigate }): React.JSX.Element {
               <div className={styles["returns-list"]}>
                 {moneyReturns.map((moneyReturn) => (
                   <ItemDiv
+                    key={moneyReturn.id}
                     id={moneyReturn.id}
                     onClick={() => {}}
                     warning={false}
