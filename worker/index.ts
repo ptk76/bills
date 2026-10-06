@@ -59,16 +59,19 @@ export default {
         const image = `data:${contentType};base64,${btoa(binary)}`;
 
         const output = (await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+          task: "query",
           image,
-          prompt: RECEIPT_PROMPT,
-        })) as unknown;
+          question: RECEIPT_PROMPT,
+          reasoning: false, // skip reasoning trace for cleaner output
+        })) as any;
         const text =
           output instanceof ReadableStream
             ? await readAiStream(output)
-            : String(output);
+            : (output.answer ?? String(output));
         console.info("TEXT", text);
         return json(parseReceiptModelOutput(text));
       } catch (error) {
+        console.info("ERROR", error);
         return json({ error: String(error) }, 500);
       }
     }
