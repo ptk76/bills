@@ -15,7 +15,6 @@ type ReceiptItem = {
   name: string;
   quantity: number;
   unit_price: number;
-  total_price: number;
 };
 
 function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
@@ -69,13 +68,28 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
         headers: { "Content-Type": file.type || "image/jpeg" },
         body: file,
       });
+      console.info("RES", response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = (await response.json()) as {
-        description?: string;
-        items?: ReceiptItem[] | null;
-      };
-
-      const validItems = (data.items ?? []).filter(
+      const result = await response.text();
+      const data = result.split("\n");
+      let title: string = "";
+      const items: ReceiptItem[] = [];
+      data.forEach((line) => {
+        if (title === "" && line.startsWith("title:"))
+          title = line.slice(6).trim();
+        if (line.startsWith("item:")) {
+          const itemLine = line.slice(5).trim().split("\t");
+          const name = itemLine[0];
+          const quantity = parseInt(itemLine[1]);
+          const unit_price = parseFloat(itemLine[2]);
+          items.push({
+            name,
+            quantity,
+            unit_price,
+          });
+        }
+      });
+      const validItems = items.filter(
         (item) =>
           item.name !== "" &&
           !isNaN(Number(item.quantity)) &&
@@ -85,13 +99,17 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
 
       if (validItems.length > 0) {
         await createFullBill(
-          "Monkey",
+          title,
           validItems.map((item) => ({
             title: item.name,
             quantity: Number(item.quantity),
             price: Number(item.unit_price),
           })),
         );
+        setAiStatus({
+          status: "done",
+          message: "",
+        });
         props.onNavigate("home");
         return;
       }
@@ -99,7 +117,7 @@ function Home(props: { onNavigate: OnNavigate }): React.JSX.Element {
       // No parseable items: still surface what the model read.
       setAiStatus({
         status: "done",
-        message: data.description ?? t("home.scanPhotoError"),
+        message: t("home.scanPhotoError"),
       });
     } catch (error) {
       console.error("Photo upload failed:", error);

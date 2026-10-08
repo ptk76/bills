@@ -2,14 +2,17 @@
 // return structured JSON; parsing is defensive because small models often wrap
 // the output in prose or omit fields.
 
-export const RECEIPT_PROMPT = `You are a receipt parser. Look at this image of a receipt and return ONLY a JSON object with no extra text and no markdown code fences, in exactly this shape:
-{"total": 23.4, "items": [{"name": "Milk", "quantity": 1, "unit_price": 3.5, "total_price": 3.5}]}
-Rules:
-- "name" is the product name as printed on the receipt.
-- "quantity" is a number (default 1 if not shown).
-- "unit_price" and "total_price" are numbers, without currency symbols.
-- Include every line item; skip totals, discounts and footer lines.
-- If you cannot read any items, return {"total": null, "items": []}.`;
+export const RECEIPT_PROMPT = `
+You are a receipt parser. Look at this image of a receipt and convert it into a plain text:
+title:RECEIPT_TITLE
+item:\tITEM_NAME\tITEM_QUANTITY\tITEM_PRICE
+where:
+- RECEIPT_TITLE is a name of the receipt, like a name of the restaurant, a store, there must only one line with the title
+- ITEM_NAME is an item's name
+- ITEM_QUANTITY is the quantity of the purchased item
+- ITEM_PRICE is the price for the single item
+There can be many lines with the prefix "item:"
+`;
 
 export interface ReceiptItem {
   name: string;
